@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
                         onNavigate = viewModel::navigateTo,
                         onBack = viewModel::navigateBack,
                         onRequestHomeRole = viewModel::onRequestHomeRole,
+                        onSecurityFinished = { message, next -> viewModel.onSecurityFinished(message, next) },
+                        onDismissMessage = viewModel::dismissMessage,
                     )
                 }
             }

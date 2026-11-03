@@ -27,8 +27,12 @@ sealed interface MainEvent {
     data object OpenHomeSettings : MainEvent
 }
 
+/** Aviso de una sola lectura mostrado en Inicio tras una operación administrativa. */
+enum class UiMessage { PinEnabled, PinChanged, PinDisabled }
+
 data class MainUiState(
     val screen: Screen = Screen.Home,
+    val message: UiMessage? = null,
     val roleStatus: HomeRoleStatus = HomeRoleStatus.Unavailable,
     /** Se muestra mientras no se pudo abrir ningún ajuste Home del sistema. */
     val homeSettingsUnavailable: Boolean = false,
@@ -58,9 +62,22 @@ class MainViewModel @Inject constructor(
         _state.update { it.copy(screen = screen) }
     }
 
+    /** Seguridad vuelve a Configuración (sigue dentro de administración); el resto, a Inicio. */
     fun navigateBack() {
-        if (_state.value.screen != Screen.Home) navigateTo(Screen.Home)
+        when (_state.value.screen) {
+            Screen.Home -> Unit
+            Screen.Security -> navigateTo(Screen.Settings)
+            else -> navigateTo(Screen.Home)
+        }
     }
+
+    /** Operación administrativa terminada: se sale de administración (la sesión se revoca) con un aviso. */
+    fun onSecurityFinished(message: UiMessage?, next: Screen = Screen.Home) {
+        navigateTo(next)
+        _state.update { it.copy(message = message) }
+    }
+
+    fun dismissMessage() = _state.update { it.copy(message = null) }
 
     /** `onNewIntent` con categoría HOME: cierra administración, revoca la sesión y vuelve a Inicio. */
     fun onHomeIntent() {

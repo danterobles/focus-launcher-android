@@ -40,6 +40,8 @@ fun HomeScreen(
     onRequestHomeRole: () -> Unit,
     onNoticeShown: () -> Unit,
     modifier: Modifier = Modifier,
+    message: com.focuslauncher.presentation.navigation.UiMessage? = null,
+    onMessageShown: () -> Unit = {},
 ) {
     LaunchedEffect(state.notice) {
         if (state.notice != null) {
@@ -47,8 +49,26 @@ fun HomeScreen(
             onNoticeShown()
         }
     }
+    LaunchedEffect(message) {
+        if (message != null) {
+            kotlinx.coroutines.delay(5_000)
+            onMessageShown()
+        }
+    }
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.screen_home), style = MaterialTheme.typography.headlineMedium)
+        message?.let {
+            Text(
+                stringResource(
+                    when (it) {
+                        com.focuslauncher.presentation.navigation.UiMessage.PinEnabled -> R.string.message_pin_enabled
+                        com.focuslauncher.presentation.navigation.UiMessage.PinChanged -> R.string.message_pin_changed
+                        com.focuslauncher.presentation.navigation.UiMessage.PinDisabled -> R.string.message_pin_disabled
+                    },
+                ),
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
         if (roleStatus != HomeRoleStatus.Held) {
             Text(
                 stringResource(

@@ -11,6 +11,14 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
+object OwnPackageModule {
+    @dagger.Provides
+    fun provideOwnPackage(@dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context): com.focuslauncher.domain.usecase.OwnPackage =
+        com.focuslauncher.domain.usecase.OwnPackage(context.packageName)
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
 abstract class DataModule {
     @Binds
     abstract fun bindAppCatalogRepository(impl: AndroidAppCatalogRepository): AppCatalogRepository

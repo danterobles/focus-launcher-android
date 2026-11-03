@@ -97,10 +97,12 @@ Aceptación: pruebas de límites y ceros iniciales, confirmación, salt nuevo, t
 
 ### T07 — Editor y ajustes protegidos
 
-- [ ] Agrupar catálogo por paquete; controles de visible/oculto y resumen de múltiples actividades.
-- [ ] Guardar cada cambio por el coordinador; reflejar estado confirmado, pendiente o error.
-- [ ] Incorporar pantallas de PIN y bloqueo según estado persistido real.
-- [ ] Confirmar desactivación de PIN y restablecimiento; conservar tombstones al desaparecer paquetes.
+- [x] Agrupar catálogo por paquete; controles de visible/oculto y resumen de múltiples actividades.
+- [x] Guardar cada cambio por el coordinador; reflejar estado confirmado, pendiente o error.
+- [x] Incorporar pantallas de PIN y bloqueo según estado persistido real.
+- [x] Confirmar desactivación de PIN y restablecimiento; conservar tombstones al desaparecer paquetes.
+
+Estado: **validada en emulador API 34** (2026-11-03); TalkBack/Recientes en T09 y OEM en T10. Evidencia en `docs/validation/T07.md`.
 
 Dependencias: T03, T04, T05, T06. Cubre RF-05, RF-07, RF-08, RF-12, RF-14, RF-15.
 

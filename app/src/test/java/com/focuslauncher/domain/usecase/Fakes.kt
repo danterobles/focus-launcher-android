@@ -40,3 +40,47 @@ class FakeSettings(initial: SettingsReadState = SettingsReadState.Loading) : Foc
     override val settings: Flow<SettingsReadState> = state
     override fun retry() = Unit
 }
+
+/** Administración simulada y programable. Al aceptar un cambio actualiza la política como lo haría la persistencia real. */
+class FakeAdmin(private val settings: FakeSettings? = null) : com.focuslauncher.domain.repository.AdminRepository {
+    override val isAuthorized = MutableStateFlow(false)
+    val verifyResults = ArrayDeque<com.focuslauncher.domain.model.AuthenticationResult>()
+    var verifyDelay: suspend () -> Unit = {}
+    var verifyCalls = 0
+    var cooldownMs = 0L
+    var hideResult: com.focuslauncher.domain.model.MutationResult = com.focuslauncher.domain.model.MutationResult.Success
+    var hideDelay: suspend () -> Unit = {}
+    val hideCalls = mutableListOf<Pair<AppPackageKey, Boolean>>()
+    var pinResult: com.focuslauncher.domain.model.MutationResult = com.focuslauncher.domain.model.MutationResult.Success
+    val pinCalls = mutableListOf<String>()
+    var locks = 0
+
+    override suspend fun verifyPin(pin: CharArray): com.focuslauncher.domain.model.AuthenticationResult {
+        verifyCalls++
+        verifyDelay()
+        val r = verifyResults.removeFirstOrNull() ?: com.focuslauncher.domain.model.AuthenticationResult.IncorrectPin(4)
+        if (r == com.focuslauncher.domain.model.AuthenticationResult.Success) isAuthorized.value = true
+        pin.fill('\u0000')
+        return r
+    }
+
+    override fun lock() { locks++; isAuthorized.value = false }
+    override suspend fun cooldownRemainingMs() = cooldownMs
+
+    override suspend fun setPackageHidden(key: AppPackageKey, hidden: Boolean): com.focuslauncher.domain.model.MutationResult {
+        hideCalls += key to hidden
+        hideDelay()
+        if (hideResult == com.focuslauncher.domain.model.MutationResult.Success) {
+            (settings?.state?.value as? SettingsReadState.Ready)?.let { ready ->
+                val set = ready.settings.visibility.hiddenPackages.let { if (hidden) it + key else it - key }
+                settings.state.value = SettingsReadState.Ready(ready.settings.copy(visibility = VisibilityPolicy(set)))
+            }
+        }
+        return hideResult
+    }
+
+    override suspend fun enablePin(pin: CharArray, confirmation: CharArray): com.focuslauncher.domain.model.MutationResult { pinCalls += "enable"; return pinResult }
+    override suspend fun changePin(pin: CharArray, confirmation: CharArray): com.focuslauncher.domain.model.MutationResult { pinCalls += "change"; return pinResult }
+    override suspend fun disablePin(): com.focuslauncher.domain.model.MutationResult { pinCalls += "disable"; return pinResult }
+    override suspend fun resetConfiguration(): com.focuslauncher.domain.model.MutationResult { pinCalls += "reset"; return pinResult }
+}

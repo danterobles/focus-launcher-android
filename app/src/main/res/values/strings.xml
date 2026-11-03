@@ -32,4 +32,68 @@
     <string name="notice_app_unavailable">Esa aplicación ya no está disponible.</string>
     <string name="notice_launch_failed">No se pudo abrir la aplicación.</string>
     <string name="notice_settings_unavailable">No se pudo comprobar la configuración; no se abrió nada.</string>
+
+    <string name="action_retry">Reintentar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_back_settings">Volver a Configuración</string>
+
+    <string name="pin_gate_title">Ingresa el PIN</string>
+    <string name="pin_gate_body">La configuración de Focus está protegida con un PIN.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_new_label">PIN nuevo</string>
+    <string name="pin_confirm_label">Confirmar PIN</string>
+    <string name="pin_submit">Desbloquear</string>
+    <string name="pin_verifying">Verificando…</string>
+    <string name="pin_saving">Guardando el PIN…</string>
+    <string name="pin_incorrect">PIN incorrecto.</string>
+    <plurals name="pin_incorrect_with_attempts">
+        <item quantity="one">PIN incorrecto. Queda %d intento antes de una espera.</item>
+        <item quantity="other">PIN incorrecto. Quedan %d intentos antes de una espera.</item>
+    </plurals>
+    <string name="pin_cooldown">Demasiados intentos. Espera %1$d s. Si Focus se cierra, la espera empieza de nuevo por completo.</string>
+    <string name="pin_could_not_verify">No se pudo verificar. Inténtalo de nuevo.</string>
+    <string name="pin_storage_failure">No se pudo guardar el intento; no se abrió nada.</string>
+    <string name="pin_recovery_required">La configuración necesita recuperación. Consulta la ayuda.</string>
+    <string name="pin_requirements">De 6 a 12 dígitos (0–9). Si lo olvidas, no se puede recuperar.</string>
+    <string name="pin_mismatch">Los PIN no coinciden.</string>
+    <string name="pin_invalid">El PIN no es válido o no coincide.</string>
+
+    <string name="state_visible">Visible</string>
+    <string name="state_hidden">Oculta</string>
+    <string name="settings_locked">Desbloquea con tu PIN para ver la configuración.</string>
+    <string name="settings_scope_note">Ocultar solo cambia lo que se muestra en Focus: la aplicación puede seguir abriéndose desde notificaciones, enlaces, Ajustes u otro launcher.</string>
+    <string name="settings_no_apps">No se encontraron aplicaciones para mostrar.</string>
+    <string name="row_not_installed">No instalada · %1$s · la regla se conserva</string>
+    <plurals name="row_multiple_activities">
+        <item quantity="one">%1$d actividad: %2$s</item>
+        <item quantity="many">%1$d actividades: %2$s</item>
+        <item quantity="other">%1$d actividades: %2$s</item>
+    </plurals>
+    <string name="save_saving">Guardando…</string>
+    <string name="save_saved">Cambios guardados.</string>
+    <string name="save_failed_session">La sesión caducó. Vuelve a ingresar el PIN.</string>
+    <string name="save_failed_storage">No se pudo guardar el cambio.</string>
+    <string name="save_failed_unavailable">El almacén seguro no está disponible. Inténtalo de nuevo.</string>
+    <string name="save_failed_rejected">Ese cambio no se permite.</string>
+
+    <string name="security_pin_on">El PIN está activado.</string>
+    <string name="security_pin_off">El PIN está desactivado: cualquiera que use este teléfono puede cambiar la configuración.</string>
+    <string name="security_pin_note">El PIN solo protege la configuración de Focus; no cambia el bloqueo de Android.</string>
+    <string name="security_create_title">Crear un PIN</string>
+    <string name="security_create_action">Activar PIN</string>
+    <string name="security_change_title">Cambiar el PIN</string>
+    <string name="security_change_action">Guardar PIN nuevo</string>
+    <string name="security_disable_action">Desactivar PIN</string>
+    <string name="security_reset_title">Restablecer Focus</string>
+    <string name="security_reset_action">Restablecer configuración</string>
+    <string name="confirm_disable_title">¿Desactivar el PIN?</string>
+    <string name="confirm_disable_body">Cualquiera que use este teléfono podrá cambiar la configuración de Focus sin PIN.</string>
+    <string name="confirm_disable_action">Desactivar</string>
+    <string name="confirm_reset_title">¿Restablecer Focus?</string>
+    <string name="confirm_reset_body">Se borrarán todas las reglas de visibilidad, el aviso inicial y el PIN. No se puede deshacer.</string>
+    <string name="confirm_reset_action">Restablecer</string>
+
+    <string name="message_pin_enabled">PIN activado. Se pedirá al abrir la configuración.</string>
+    <string name="message_pin_changed">PIN cambiado.</string>
+    <string name="message_pin_disabled">PIN desactivado.</string>
 </resources>
