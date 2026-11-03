@@ -435,4 +435,45 @@ class AdminAccessCoordinatorTest {
         h.enablePin(pin)
         assertNotEquals(v1.toList(), h.state().pin.enabled.verifier.toByteArray().toList())
     }
+
+    // ---------------------------------------------------------------- aviso de alcance (T08)
+
+    @Test fun acceptingTheNoticePersistsAcrossARestartAndIsIdempotent() {
+        assertFalse(h.state().onboardingAccepted)
+        assertEquals(MutationResult.Success, runBlocking { h.admin.acceptOnboarding() })
+        assertEquals(MutationResult.Success, runBlocking { h.admin.acceptOnboarding() })
+        h.restart()
+        assertTrue(h.state().onboardingAccepted)
+    }
+
+    @Test fun acceptingTheNoticeNeverNeedsASessionAndChangesNothingElse() {
+        h.enablePin(pin); h.hide(); // sin sesión: hide queda denegado
+        val before = h.state()
+        assertEquals(MutationResult.Success, runBlocking { h.admin.acceptOnboarding() })
+        assertEquals(before.toBuilder().setOnboardingAccepted(true).build(), h.state())
+    }
+
+    @Test fun aFailedWriteIsNeverReportedAsAccepted() {
+        h.store.failWhen = { true }
+        assertEquals(MutationResult.StorageFailure, runBlocking { h.admin.acceptOnboarding() })
+        h.store.failWhen = { false }
+        assertFalse(h.state().onboardingAccepted)
+    }
+
+    @Test fun anUnreadableStateRequiresRecoveryInsteadOfAccepting() {
+        h.enablePin(pin); h.close()
+        h.file.writeBytes(h.file.readBytes().also { it[it.size / 2] = (it[it.size / 2].toInt() xor 1).toByte() })
+        h.restart()
+        assertEquals(MutationResult.RecoveryRequired, runBlocking { h.admin.acceptOnboarding() })
+    }
+
+    @Test fun resettingFromInsideReturnsToTheNoticeWithEmptyRulesAndNoPin() {
+        runBlocking { h.admin.acceptOnboarding() }
+        h.hide(); h.enabledAndUnlocked()
+        assertEquals(MutationResult.Success, runBlocking { h.admin.resetConfiguration() })
+        val s = h.state()
+        assertFalse(s.onboardingAccepted) // vuelve la Bienvenida
+        assertEquals(0, s.hiddenPackagesCount)
+        assertEquals(PinConfigProto.ModeCase.DISABLED, s.pin.modeCase)
+    }
 }

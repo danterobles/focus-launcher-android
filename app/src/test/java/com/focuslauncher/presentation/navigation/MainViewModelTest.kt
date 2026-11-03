@@ -10,6 +10,12 @@ import com.focuslauncher.domain.model.CatalogState
 import com.focuslauncher.domain.model.LaunchResult
 import com.focuslauncher.domain.repository.AdminRepository
 import com.focuslauncher.domain.repository.AppCatalogRepository
+import com.focuslauncher.domain.repository.OnboardingRepository
+import com.focuslauncher.domain.usecase.FakeSettings
+import com.focuslauncher.domain.model.LauncherSettings
+import com.focuslauncher.domain.model.MutationResult
+import com.focuslauncher.domain.model.SettingsReadState
+import com.focuslauncher.domain.model.VisibilityPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
@@ -55,11 +61,19 @@ class MainViewModelTest {
         override suspend fun resetConfiguration() = com.focuslauncher.domain.model.MutationResult.Success
     }
 
+    private class FakeOnboarding(var result: MutationResult = MutationResult.Success) : OnboardingRepository {
+        var calls = 0
+        override suspend fun acceptOnboarding(): MutationResult { calls++; return result }
+    }
+
+    private fun settings(accepted: Boolean) =
+        SettingsReadState.Ready(LauncherSettings(accepted, VisibilityPolicy(emptySet()), pinEnabled = false))
+
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
     private fun TestScope.viewModel(controller: FakeRoleController) =
-        MainViewModel(controller, FakeCatalog(), FakeAdmin(), TestDispatchers(dispatcher))
+        MainViewModel(controller, FakeCatalog(), FakeAdmin(), FakeSettings(settings(true)), FakeOnboarding(), TestDispatchers(dispatcher))
 
     @Test
     fun homeIntentReturnsToHomeFromAnyScreen() = runTest(dispatcher) {
@@ -123,7 +137,7 @@ class MainViewModelTest {
         vm.events.test {
             vm.onRequestHomeRole()
             dispatcher.scheduler.advanceUntilIdle()
-            assertEquals(MainEvent.OpenHomeSettings, awaitItem())
+            assertEquals(MainEvent.OpenSystemSettings(SystemSettingsTarget.HomeSettings), awaitItem())
         }
     }
 
@@ -141,7 +155,7 @@ class MainViewModelTest {
     @Test
     fun leavingAdministrativeAreaRevokesTheSession() = runTest(dispatcher) {
         val admin = FakeAdmin()
-        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, TestDispatchers(dispatcher))
+        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, FakeSettings(settings(true)), FakeOnboarding(), TestDispatchers(dispatcher))
         vm.navigateTo(Screen.Settings)
         vm.navigateTo(Screen.Security) // dentro de administración: no revoca
         assertEquals(0, admin.locks)
@@ -152,7 +166,7 @@ class MainViewModelTest {
     @Test
     fun homeIntentAndStopRevokeAndLeaveNoAdministrativeScreen() = runTest(dispatcher) {
         val admin = FakeAdmin()
-        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, TestDispatchers(dispatcher))
+        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, FakeSettings(settings(true)), FakeOnboarding(), TestDispatchers(dispatcher))
         vm.navigateTo(Screen.Settings)
         vm.onHomeIntent()
         assertEquals(Screen.Home, vm.state.value.screen)
@@ -160,5 +174,80 @@ class MainViewModelTest {
         vm.onActivityStopped()
         assertEquals(Screen.Home, vm.state.value.screen)
         assertEquals(true, admin.locks >= 2)
+    }
+
+    // ------------------------------------------------------------------ T08: aviso de alcance
+
+    private fun vm(settings: FakeSettings, onboarding: FakeOnboarding = FakeOnboarding(), role: FakeRoleController = FakeRoleController(HomeRoleStatus.NotHeld, Intent("test.REQUEST_ROLE"))) =
+        MainViewModel(role, FakeCatalog(), FakeAdmin(), settings, onboarding, TestDispatchers(dispatcher))
+
+    @Test
+    fun welcomeIsNeededOnlyWhenTheConfigurationIsReadableAndNotAccepted() = runTest(dispatcher) {
+        val settings = FakeSettings(SettingsReadState.Loading)
+        val vm = vm(settings)
+        vm.needsWelcome.test {
+            assertEquals(false, awaitItem()) // cargando: ni Bienvenida ni apps
+            settings.state.value = settings(accepted = false); assertEquals(true, awaitItem())
+            settings.state.value = settings(accepted = true); assertEquals(false, awaitItem())
+            settings.state.value = settings(accepted = false); assertEquals(true, awaitItem()) // p. ej. tras restablecer
+            settings.state.value = SettingsReadState.ReadError(com.focuslauncher.domain.model.ReadErrorKind.StorageUnavailable)
+            assertEquals(false, awaitItem()) // error: no se inventa una Bienvenida
+        }
+    }
+
+    @Test
+    fun acceptingPersistsThenGoesHomeAndTheRoleRequestIsOptional() = runTest(dispatcher) {
+        val onboarding = FakeOnboarding()
+        val vm = vm(FakeSettings(settings(false)), onboarding)
+        vm.navigateTo(Screen.Welcome)
+        vm.events.test {
+            vm.onAcceptWelcome(requestHome = false); dispatcher.scheduler.advanceUntilIdle()
+            assertEquals(1, onboarding.calls)
+            assertEquals(Screen.Home, vm.state.value.screen)
+            expectNoEvents() // «probar sin cambiar mi inicio» no pide el rol
+        }
+    }
+
+    @Test
+    fun acceptingWithHomeAsksForTheRoleOnlyAfterSaving() = runTest(dispatcher) {
+        val intent = Intent("test.REQUEST_ROLE")
+        val vm = vm(FakeSettings(settings(false)), role = FakeRoleController(HomeRoleStatus.NotHeld, intent))
+        vm.events.test {
+            vm.onAcceptWelcome(requestHome = true); dispatcher.scheduler.advanceUntilIdle()
+            assertEquals(MainEvent.LaunchRoleRequest(intent), awaitItem())
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun aFailedSaveKeepsTheWelcomeShowsAnErrorAndNeverRequestsTheRole() = runTest(dispatcher) {
+        val onboarding = FakeOnboarding(MutationResult.StorageFailure)
+        val vm = vm(FakeSettings(settings(false)), onboarding)
+        vm.navigateTo(Screen.Welcome)
+        vm.events.test {
+            vm.onAcceptWelcome(requestHome = true); dispatcher.scheduler.advanceUntilIdle()
+            assertEquals(true, vm.state.value.welcomeError)
+            assertEquals(false, vm.state.value.welcomeSaving)
+            assertEquals(Screen.Welcome, vm.state.value.screen)
+            expectNoEvents()
+        }
+        onboarding.result = MutationResult.Success // reintento
+        vm.onAcceptWelcome(requestHome = false); dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(false, vm.state.value.welcomeError); assertEquals(Screen.Home, vm.state.value.screen)
+    }
+
+    @Test
+    fun systemSettingsExitsAreEventsAndAnUnavailableOneLeavesManualInstructions() = runTest(dispatcher) {
+        val vm = vm(FakeSettings(settings(true)))
+        vm.events.test {
+            SystemSettingsTarget.entries.forEach { target ->
+                vm.onOpenSystemSettings(target); dispatcher.scheduler.advanceUntilIdle()
+                assertEquals(MainEvent.OpenSystemSettings(target), awaitItem())
+            }
+        }
+        vm.onSystemSettingsUnavailable(SystemSettingsTarget.AppDetails)
+        assertEquals(SystemSettingsTarget.AppDetails, vm.state.value.settingsUnavailable)
+        vm.onSystemSettingsOpened()
+        assertEquals(null, vm.state.value.settingsUnavailable)
     }
 }

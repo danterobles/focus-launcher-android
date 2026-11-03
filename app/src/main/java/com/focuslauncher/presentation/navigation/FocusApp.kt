@@ -29,6 +29,9 @@ import com.focuslauncher.presentation.admin.AdminGate
 import com.focuslauncher.presentation.admin.AdminGateViewModel
 import com.focuslauncher.presentation.admin.PinGateScreen
 import com.focuslauncher.presentation.drawer.DrawerScreen
+import com.focuslauncher.presentation.help.HelpScreen
+import com.focuslauncher.presentation.help.HelpViewModel
+import com.focuslauncher.presentation.onboarding.WelcomeScreen
 import com.focuslauncher.presentation.drawer.DrawerViewModel
 import com.focuslauncher.presentation.home.HomeScreen
 import com.focuslauncher.presentation.home.HomeViewModel
@@ -42,23 +45,40 @@ import com.focuslauncher.presentation.settings.SettingsViewModel
 @Composable
 fun FocusApp(
     state: MainUiState,
+    needsWelcome: Boolean,
     onNavigate: (Screen) -> Unit,
     onBack: () -> Unit,
     onRequestHomeRole: () -> Unit,
     onSecurityFinished: (UiMessage?, Screen) -> Unit,
     onDismissMessage: () -> Unit,
+    onAcceptWelcome: (requestHome: Boolean) -> Unit,
+    onOpenSystemSettings: (SystemSettingsTarget) -> Unit,
 ) {
     BackHandler(enabled = state.screen != Screen.Home) { onBack() }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            when (state.screen) {
+            // El aviso de alcance va antes de cualquier configuración o apps; solo la Ayuda lo precede.
+            val screen = if (needsWelcome && state.screen != Screen.Help) Screen.Welcome else state.screen
+            when (screen) {
+                Screen.Welcome -> WelcomeScreen(
+                    saving = state.welcomeSaving,
+                    error = state.welcomeError,
+                    onAcceptAndUseAsHome = { onAcceptWelcome(true) },
+                    onAcceptAndTry = { onAcceptWelcome(false) },
+                    onOpenHelp = { onNavigate(Screen.Help) },
+                )
+                Screen.Help -> {
+                    val vm: HelpViewModel = hiltViewModel()
+                    val status by vm.status.collectAsStateWithLifecycle()
+                    HelpScreen(status, state.settingsUnavailable, onOpenSystemSettings, vm::retry, onBack)
+                }
                 Screen.Home -> {
                     val vm: HomeViewModel = hiltViewModel()
                     val home by vm.state.collectAsStateWithLifecycle()
                     HomeScreen(
                         state = home,
                         roleStatus = state.roleStatus,
-                        homeSettingsUnavailable = state.homeSettingsUnavailable,
+                        homeSettingsUnavailable = state.settingsUnavailable == SystemSettingsTarget.HomeSettings,
                         message = state.message,
                         onMessageShown = onDismissMessage,
                         onAppClick = vm::onAppClick,
@@ -67,6 +87,7 @@ fun FocusApp(
                         onOpenHelp = { onNavigate(Screen.Help) },
                         onRequestHomeRole = onRequestHomeRole,
                         onNoticeShown = vm::onNoticeShown,
+                        onRetry = vm::onRetry,
                     )
                 }
                 Screen.Drawer -> {
@@ -82,12 +103,11 @@ fun FocusApp(
                     )
                 }
                 Screen.Settings, Screen.Security -> AdminArea(
-                    screen = state.screen,
+                    screen = screen,
                     onNavigate = onNavigate,
                     onBack = onBack,
                     onSecurityFinished = onSecurityFinished,
                 )
-                else -> Placeholder(state.screen, onBack)
             }
         }
     }
@@ -146,23 +166,5 @@ private fun AdminArea(
                 onBack = onBack,
             )
         }
-    }
-}
-
-@Composable
-private fun Placeholder(screen: Screen, onBack: () -> Unit) {
-    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            stringResource(
-                when (screen) {
-                    Screen.Welcome -> R.string.screen_welcome
-                    Screen.Settings -> R.string.screen_settings
-                    Screen.Security -> R.string.screen_security
-                    else -> R.string.screen_help
-                },
-            ),
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Button(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.action_back_home)) }
     }
 }

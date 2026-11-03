@@ -6,7 +6,14 @@ import com.focuslauncher.core.di.DispatcherProvider
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
 import com.focuslauncher.domain.repository.AdminRepository
+import com.focuslauncher.domain.model.MutationResult
+import com.focuslauncher.domain.model.SettingsReadState
 import com.focuslauncher.domain.repository.AppCatalogRepository
+import com.focuslauncher.domain.repository.FocusStateRepository
+import com.focuslauncher.domain.repository.OnboardingRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -23,8 +30,8 @@ sealed interface MainEvent {
     /** Lanzar el intent oficial de solicitud de `ROLE_HOME`. */
     data class LaunchRoleRequest(val intent: Intent) : MainEvent
 
-    /** El rol no puede solicitarse: abrir los ajustes Home del sistema. */
-    data object OpenHomeSettings : MainEvent
+    /** Salida segura a una pantalla de Ajustes de Android. */
+    data class OpenSystemSettings(val target: SystemSettingsTarget) : MainEvent
 }
 
 /** Aviso de una sola lectura mostrado en Inicio tras una operación administrativa. */
@@ -34,8 +41,11 @@ data class MainUiState(
     val screen: Screen = Screen.Home,
     val message: UiMessage? = null,
     val roleStatus: HomeRoleStatus = HomeRoleStatus.Unavailable,
-    /** Se muestra mientras no se pudo abrir ningún ajuste Home del sistema. */
-    val homeSettingsUnavailable: Boolean = false,
+    /** Última salida a Ajustes de Android que no se pudo abrir (se muestran instrucciones manuales). */
+    val settingsUnavailable: SystemSettingsTarget? = null,
+    /** Guardando la aceptación del aviso / fallo al guardarla. */
+    val welcomeSaving: Boolean = false,
+    val welcomeError: Boolean = false,
 )
 
 /**
@@ -47,11 +57,21 @@ class MainViewModel @Inject constructor(
     private val roleController: HomeRoleController,
     private val catalogRepository: AppCatalogRepository,
     private val adminRepository: AdminRepository,
+    private val stateRepository: FocusStateRepository,
+    private val onboarding: OnboardingRepository,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainUiState())
     val state: StateFlow<MainUiState> = _state.asStateFlow()
+
+    /**
+     * `true` solo con la configuración legible y el aviso de alcance sin aceptar (instalación nueva o
+     * tras restablecer). Mientras carga o falla NO se muestra la Bienvenida ni apps (Inicio decide).
+     */
+    val needsWelcome: StateFlow<Boolean> = stateRepository.settings
+        .map { it is SettingsReadState.Ready && !it.settings.onboardingAccepted }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -113,14 +133,40 @@ class MainViewModel @Inject constructor(
                 HomeRoleStatus.Held -> Unit
                 HomeRoleStatus.NotHeld -> {
                     val intent = roleController.createRequestIntent()
-                    _events.send(if (intent != null) MainEvent.LaunchRoleRequest(intent) else MainEvent.OpenHomeSettings)
+                    _events.send(
+                        if (intent != null) MainEvent.LaunchRoleRequest(intent)
+                        else MainEvent.OpenSystemSettings(SystemSettingsTarget.HomeSettings),
+                    )
                 }
-                HomeRoleStatus.Unavailable -> _events.send(MainEvent.OpenHomeSettings)
+                HomeRoleStatus.Unavailable -> _events.send(MainEvent.OpenSystemSettings(SystemSettingsTarget.HomeSettings))
             }
         }
     }
 
-    fun onHomeSettingsUnavailable() = _state.update { it.copy(homeSettingsUnavailable = true) }
+    fun onOpenSystemSettings(target: SystemSettingsTarget) {
+        viewModelScope.launch { _events.send(MainEvent.OpenSystemSettings(target)) }
+    }
 
-    fun onHomeSettingsOpened() = _state.update { it.copy(homeSettingsUnavailable = false) }
+    fun onSystemSettingsUnavailable(target: SystemSettingsTarget) = _state.update { it.copy(settingsUnavailable = target) }
+
+    fun onSystemSettingsOpened() = _state.update { it.copy(settingsUnavailable = null) }
+
+    /**
+     * Acepta el aviso de alcance. Se confirma solo tras persistirlo; si falla se queda en la
+     * Bienvenida con un error. La solicitud de Home es opcional y nunca bloquea probar Focus.
+     */
+    fun onAcceptWelcome(requestHome: Boolean) {
+        if (_state.value.welcomeSaving) return
+        _state.update { it.copy(welcomeSaving = true, welcomeError = false) }
+        viewModelScope.launch {
+            val result = onboarding.acceptOnboarding()
+            _state.update { it.copy(welcomeSaving = false, welcomeError = result != MutationResult.Success) }
+            if (result == MutationResult.Success) {
+                navigateTo(Screen.Home)
+                if (requestHome) onRequestHomeRole()
+            }
+        }
+    }
+
+    fun retryState() = stateRepository.retry()
 }

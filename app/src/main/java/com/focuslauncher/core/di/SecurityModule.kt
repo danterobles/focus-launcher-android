@@ -24,6 +24,9 @@ import kotlinx.coroutines.SupervisorJob
 abstract class AdminBindingsModule {
     @Binds
     abstract fun bindAdminRepository(impl: AdminAccessCoordinator): AdminRepository
+
+    @Binds
+    abstract fun bindOnboardingRepository(impl: AdminAccessCoordinator): com.focuslauncher.domain.repository.OnboardingRepository
 }
 
 @Module

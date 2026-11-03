@@ -31,7 +31,7 @@ class HomeViewModelTest {
     @Before fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
     @After fun tearDown() = Dispatchers.resetMain()
 
-    private fun vm() = HomeViewModel(ObserveVisibleApps(catalog, settings), LaunchApp(ObserveVisibleApps(catalog, settings), catalog))
+    private fun vm() = HomeViewModel(ObserveVisibleApps(catalog, settings), LaunchApp(ObserveVisibleApps(catalog, settings), catalog), settings, catalog)
 
     @Test fun startsLoadingAndNeverShowsAppsBeforeThePolicyIsValid() = runTest {
         vm().state.test {
@@ -85,5 +85,12 @@ class HomeViewModelTest {
             vm.onNoticeShown()
             assertEquals(null, expectMostRecentItem().notice)
         }
+    }
+
+    @Test fun retryAsksForANewPolicyReadAndANewCatalogQuery() = runTest {
+        val vm = vm()
+        vm.onRetry()
+                assertEquals(1, settings.retries)
+        assertEquals(1, catalog.refreshes)
     }
 }

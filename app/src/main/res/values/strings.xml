@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Focus Launcher</string>
 
-    <string name="screen_welcome">Bienvenida</string>
     <string name="screen_home">Inicio</string>
     <string name="screen_drawer">Todas las aplicaciones</string>
     <string name="screen_settings">Configuración de Focus</string>
@@ -96,4 +95,46 @@
     <string name="message_pin_enabled">PIN activado. Se pedirá al abrir la configuración.</string>
     <string name="message_pin_changed">PIN cambiado.</string>
     <string name="message_pin_disabled">PIN desactivado.</string>
+
+    <string name="welcome_title">Bienvenido a Focus Launcher</string>
+    <string name="welcome_accept_home">Entendido: usar Focus como pantalla de inicio</string>
+    <string name="welcome_accept_try">Entendido: probar Focus sin cambiar mi inicio</string>
+    <string name="welcome_save_error">No se pudo guardar. Inténtalo de nuevo.</string>
+
+    <string name="notice_scope_what">Focus es una pantalla de inicio que te deja elegir qué aplicaciones aparecen en ella.</string>
+    <string name="notice_scope_hiding">Ocultar una aplicación solo cambia lo que se muestra en Focus. Puede seguir abriéndose desde notificaciones, enlaces, Ajustes de Android, Recientes, asistentes u otro launcher.</string>
+    <string name="notice_scope_new_apps">Las aplicaciones nuevas aparecen visibles por defecto; tú decides cuáles ocultar.</string>
+    <string name="notice_scope_pin">El PIN es opcional: protege solo la configuración de Focus y no cambia el bloqueo de Android. Si lo olvidas, no se puede recuperar.</string>
+    <string name="notice_scope_profile">Solo se gestionan las aplicaciones de este perfil personal. Los perfiles de trabajo, los usuarios secundarios y el Espacio privado de Android no son compatibles y sus aplicaciones no aparecen en Focus.</string>
+    <string name="notice_scope_not_parental">Focus no es un bloqueo parental: el propietario del teléfono puede cambiar de launcher, borrar los datos de Focus o desinstalarlo desde Android.</string>
+    <string name="notice_scope_offline">Todo funciona sin conexión: sin cuentas, anuncios ni telemetría, y la configuración no sale de este teléfono.</string>
+
+    <string name="help_scope_title">Qué hace Focus y sus límites</string>
+    <string name="help_forgot_title">Olvidé el PIN o la configuración está dañada</string>
+    <string name="help_forgot_cannot_recover">El PIN olvidado no se puede recuperar.</string>
+    <string name="help_forgot_no_master">No existe un PIN maestro ni una pregunta secreta.</string>
+    <string name="help_forgot_steps_intro">Cómo recuperar el acceso desde Android:</string>
+    <string name="help_forgot_step_1">1. Cambia el launcher: abre «Ajustes de pantalla de inicio» (botón de abajo) y elige otra app de inicio. En Ajustes: Aplicaciones → Apps predeterminadas → App de inicio.</string>
+    <string name="help_forgot_step_2">2. Borra los datos de Focus: abre «Información de la app de Focus» (botón de abajo) → Almacenamiento → Borrar datos. También puedes desinstalar Focus.</string>
+    <string name="help_forgot_step_3">3. Vuelve a elegir Focus como pantalla de inicio si quieres seguir usándolo.</string>
+    <string name="help_forgot_loses">Al borrar los datos se pierden las reglas de visibilidad, el aviso inicial y el PIN: Focus empieza desde cero.</string>
+    <string name="help_reset_inside">Si recuerdas tu PIN, también puedes restablecer Focus desde Configuración → Seguridad → Restablecer configuración. Esa opción exige el PIN y una confirmación.</string>
+    <string name="help_android_title">Salir a Ajustes de Android</string>
+    <string name="help_android_body">Estos accesos funcionan siempre, con o sin PIN.</string>
+    <string name="help_open_home_settings">Abrir ajustes de pantalla de inicio</string>
+    <string name="help_open_app_details">Abrir información de la app de Focus</string>
+    <string name="help_open_android_settings">Abrir Ajustes de Android</string>
+    <string name="help_settings_unavailable">Este dispositivo no pudo abrir esa pantalla.</string>
+    <string name="help_manual_home">Ábrela a mano: Ajustes → Aplicaciones → Apps predeterminadas → App de inicio.</string>
+    <string name="help_manual_app_details">Ábrela a mano: Ajustes → Aplicaciones → Focus Launcher → Almacenamiento → Borrar datos.</string>
+    <string name="help_manual_settings">Abre la app Ajustes desde la lista de aplicaciones del teléfono.</string>
+
+    <string name="help_status_recovery_title">La configuración de Focus necesita recuperación</string>
+    <string name="help_status_recovery_steps">Focus no mostrará aplicaciones ni cambiará nada hasta entonces, y no puede arreglarlo por sí mismo. Sigue los pasos de «Olvidé el PIN o la configuración está dañada».</string>
+    <string name="help_status_error_title">No se pudo leer la configuración</string>
+    <string name="help_status_error_body">Puede ser temporal. Por seguridad no se muestran aplicaciones hasta poder leerla.</string>
+    <string name="help_recovery_key_lost">La clave que protege la configuración ya no está disponible.</string>
+    <string name="help_recovery_corrupt">El archivo de configuración está dañado o fue modificado.</string>
+    <string name="help_recovery_future">La configuración es de una versión más nueva de Focus.</string>
+    <string name="help_recovery_interrupted">La primera configuración se interrumpió y quedó a medias.</string>
 </resources>

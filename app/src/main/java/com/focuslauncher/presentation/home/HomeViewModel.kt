@@ -3,6 +3,8 @@ package com.focuslauncher.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.focuslauncher.domain.model.AppId
+import com.focuslauncher.domain.repository.AppCatalogRepository
+import com.focuslauncher.domain.repository.FocusStateRepository
 import com.focuslauncher.domain.usecase.LaunchApp
 import com.focuslauncher.domain.usecase.ObserveVisibleApps
 import com.focuslauncher.presentation.common.AppsContent
@@ -29,6 +31,8 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     observeVisibleApps: ObserveVisibleApps,
     private val launchApp: LaunchApp,
+    private val stateRepository: FocusStateRepository,
+    private val catalog: AppCatalogRepository,
 ) : ViewModel() {
 
     private val notice = MutableStateFlow<Notice?>(null)
@@ -43,4 +47,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onNoticeShown() { notice.value = null }
+
+    /** Reintento tras un error temporal de lectura (política o catálogo). */
+    fun onRetry() {
+        stateRepository.retry()
+        viewModelScope.launch { catalog.refresh() }
+    }
 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.focuslauncher.R
 import com.focuslauncher.core.home.HomeRoleStatus
 import com.focuslauncher.domain.model.AppId
+import com.focuslauncher.presentation.common.AppsContent
 import com.focuslauncher.presentation.common.AppsSurface
 import com.focuslauncher.presentation.common.NoticeText
 
@@ -40,6 +41,7 @@ fun HomeScreen(
     onRequestHomeRole: () -> Unit,
     onNoticeShown: () -> Unit,
     modifier: Modifier = Modifier,
+    onRetry: () -> Unit = {},
     message: com.focuslauncher.presentation.navigation.UiMessage? = null,
     onMessageShown: () -> Unit = {},
 ) {
@@ -80,6 +82,13 @@ fun HomeScreen(
             if (homeSettingsUnavailable) Text(stringResource(R.string.home_settings_unavailable))
         }
         AppsSurface(state.content, onAppClick, Modifier.weight(1f))
+        // Un error temporal (no el de recuperación) se puede reintentar; recuperar no se arregla reintentando.
+        val blocked = (state.content as? AppsContent.Blocked)?.reason
+        if (blocked is com.focuslauncher.domain.model.BlockedReason.SettingsReadError ||
+            blocked is com.focuslauncher.domain.model.BlockedReason.CatalogFailure
+        ) {
+            Button(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.action_retry)) }
+        }
         NoticeText(state.notice)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onOpenDrawer, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.screen_drawer)) }

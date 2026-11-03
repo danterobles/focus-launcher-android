@@ -110,11 +110,13 @@ Aceptación: sin PIN se puede editar; habilitado, solo tras verificar y mientras
 
 ### T08 — Bienvenida, ayuda y recuperación
 
-- [ ] Mostrar alcance visual, PIN opcional, apps nuevas visibles y soporte de perfil local.
-- [ ] Guardar aceptación de aviso y ofrecer selección Home sin bloquear la prueba si se cancela.
-- [ ] Ayuda pública y salida segura a Ajustes de Android, con alternativa si no hay Activity disponible.
-- [ ] Añadir error temporal con reintento y RecoveryRequired sin reset interno no autenticado.
-- [ ] Implementar restablecimiento interno confirmado, autorizado y transaccional.
+- [x] Mostrar alcance visual, PIN opcional, apps nuevas visibles y soporte de perfil local.
+- [x] Guardar aceptación de aviso y ofrecer selección Home sin bloquear la prueba si se cancela.
+- [x] Ayuda pública y salida segura a Ajustes de Android, con alternativa si no hay Activity disponible.
+- [x] Añadir error temporal con reintento y RecoveryRequired sin reset interno no autenticado.
+- [x] Implementar restablecimiento interno confirmado, autorizado y transaccional.
+
+Estado: **validada en emulador API 34** (2026-11-03); TalkBack en T09 y OEM/API 31–35 en T10. Evidencia en `docs/validation/T08.md`.
 
 Dependencias: T02, T04, T06, T07. Cubre RF-01, RF-02, RF-13, RF-14, RF-15.
 

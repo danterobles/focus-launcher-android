@@ -38,7 +38,8 @@ class FakeCatalog(initial: CatalogState = CatalogState.Loading) : AppCatalogRepo
 class FakeSettings(initial: SettingsReadState = SettingsReadState.Loading) : FocusStateRepository {
     val state = MutableStateFlow(initial)
     override val settings: Flow<SettingsReadState> = state
-    override fun retry() = Unit
+    var retries = 0
+    override fun retry() { retries++ }
 }
 
 /** Administración simulada y programable. Al aceptar un cambio actualiza la política como lo haría la persistencia real. */

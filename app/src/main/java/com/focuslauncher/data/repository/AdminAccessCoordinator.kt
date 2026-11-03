@@ -19,6 +19,7 @@ import com.focuslauncher.domain.model.AppPackageKey
 import com.focuslauncher.domain.model.AuthenticationResult
 import com.focuslauncher.domain.model.MutationResult
 import com.focuslauncher.domain.repository.AdminRepository
+import com.focuslauncher.domain.repository.OnboardingRepository
 import com.google.protobuf.ByteString
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -42,7 +43,7 @@ class AdminAccessCoordinator @Inject constructor(
     private val sessions: AdminSessionManager,
     private val hasher: PinHasher,
     private val clock: MonotonicClock,
-) : AdminRepository {
+) : AdminRepository, OnboardingRepository {
 
     private val mutex = Mutex()
     private val timerLock = Any()
@@ -254,6 +255,13 @@ class AdminAccessCoordinator @Inject constructor(
             sessions.revoke()
         }
         return result
+    }
+
+    // ------------------------------------------------------------------ aviso de alcance
+
+    /** Serializado con el resto de escrituras por el mismo Mutex; confirma solo tras persistir. */
+    override suspend fun acceptOnboarding(): MutationResult = mutex.withLock {
+        store.update { cur -> if (cur.onboardingAccepted) cur else cur.toBuilder().setOnboardingAccepted(true).build() }.toMutation()
     }
 
     // ------------------------------------------------------------------ mapeo de errores

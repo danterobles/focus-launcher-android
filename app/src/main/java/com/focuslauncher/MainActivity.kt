@@ -2,6 +2,7 @@ package com.focuslauncher
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.provider.Settings
@@ -23,6 +24,7 @@ import com.focuslauncher.presentation.navigation.FocusApp
 import com.focuslauncher.presentation.navigation.MainEvent
 import com.focuslauncher.presentation.navigation.MainViewModel
 import com.focuslauncher.presentation.navigation.Screen
+import com.focuslauncher.presentation.navigation.SystemSettingsTarget
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -48,14 +50,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
+                val needsWelcome by viewModel.needsWelcome.collectAsStateWithLifecycle()
                 CompositionLocalProvider(LocalAppIconLoader provides iconLoader) {
                     FocusApp(
                         state = state,
+                        needsWelcome = needsWelcome,
                         onNavigate = viewModel::navigateTo,
                         onBack = viewModel::navigateBack,
                         onRequestHomeRole = viewModel::onRequestHomeRole,
                         onSecurityFinished = { message, next -> viewModel.onSecurityFinished(message, next) },
                         onDismissMessage = viewModel::dismissMessage,
+                        onAcceptWelcome = viewModel::onAcceptWelcome,
+                        onOpenSystemSettings = viewModel::onOpenSystemSettings,
                     )
                 }
             }
@@ -113,18 +119,27 @@ class MainActivity : ComponentActivity() {
             is MainEvent.LaunchRoleRequest -> try {
                 roleRequest.launch(event.intent)
             } catch (_: ActivityNotFoundException) {
-                openHomeSettings()
+                openSystemSettings(SystemSettingsTarget.HomeSettings)
             }
-            MainEvent.OpenHomeSettings -> openHomeSettings()
+            is MainEvent.OpenSystemSettings -> openSystemSettings(event.target)
         }
     }
 
-    private fun openHomeSettings() {
+    /** Salidas seguras a Ajustes de Android: intents fijos y, si no hay Activity, instrucciones manuales. */
+    private fun openSystemSettings(target: SystemSettingsTarget) {
+        val intent = when (target) {
+            SystemSettingsTarget.HomeSettings -> Intent(Settings.ACTION_HOME_SETTINGS)
+            SystemSettingsTarget.AppDetails ->
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+            SystemSettingsTarget.AndroidSettings -> Intent(Settings.ACTION_SETTINGS)
+        }
         try {
-            startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
-            viewModel.onHomeSettingsOpened()
+            startActivity(intent)
+            viewModel.onSystemSettingsOpened()
         } catch (_: ActivityNotFoundException) {
-            viewModel.onHomeSettingsUnavailable()
+            viewModel.onSystemSettingsUnavailable(target)
+        } catch (_: SecurityException) {
+            viewModel.onSystemSettingsUnavailable(target)
         }
     }
 }
