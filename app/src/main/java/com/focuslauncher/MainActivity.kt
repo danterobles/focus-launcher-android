@@ -2,6 +2,7 @@ package com.focuslauncher
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -38,8 +39,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
+                val summary by viewModel.catalogSummary.collectAsStateWithLifecycle()
                 FocusApp(
                     state = state,
+                    catalogSummary = if (isDebuggable) summary else null,
                     onNavigate = viewModel::navigateTo,
                     onBack = viewModel::navigateBack,
                     onRequestHomeRole = viewModel::onRequestHomeRole,
@@ -54,9 +57,13 @@ class MainActivity : ComponentActivity() {
         // Un Home recibido al crear la Activity ya arranca en la pantalla principal.
     }
 
+    private val isDebuggable: Boolean
+        get() = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+
     override fun onResume() {
         super.onResume()
         viewModel.refreshRoleStatus()
+        viewModel.refreshCatalog()
     }
 
     override fun onNewIntent(intent: Intent) {

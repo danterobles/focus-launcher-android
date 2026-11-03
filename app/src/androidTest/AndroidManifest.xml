@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Fixtures de prueba: el APK de instrumentación (com.focuslauncher.test) es otro paquete con
+    dos actividades launcher y una actividad sin filtro LAUNCHER.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.focuslauncher.fixture.FixtureActivityA" android:exported="true"
+            android:label="Fixture Alfa">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.focuslauncher.fixture.FixtureActivityB" android:exported="true"
+            android:label="Fixture Beta">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Sin categoría LAUNCHER: no debe aparecer en el catálogo. -->
+        <activity android:name="com.focuslauncher.fixture.FixtureNoLauncherActivity" android:exported="true"
+            android:label="Fixture Sin Launcher" />
+    </application>
+</manifest>

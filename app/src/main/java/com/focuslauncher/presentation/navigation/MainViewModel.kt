@@ -5,10 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.focuslauncher.core.di.DispatcherProvider
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
+import com.focuslauncher.domain.model.CatalogState
+import com.focuslauncher.domain.repository.AppCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -25,6 +30,9 @@ sealed interface MainEvent {
     data object OpenHomeSettings : MainEvent
 }
 
+/** Resumen no sensible del catálogo (solo cuenta; nunca la lista sin filtrar). T05 lo sustituye. */
+data class CatalogSummary(val count: Int? = null, val error: Boolean = false)
+
 data class MainUiState(
     val screen: Screen = Screen.Home,
     val roleStatus: HomeRoleStatus = HomeRoleStatus.Unavailable,
@@ -39,11 +47,23 @@ data class MainUiState(
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val roleController: HomeRoleController,
+    private val catalogRepository: AppCatalogRepository,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainUiState())
     val state: StateFlow<MainUiState> = _state.asStateFlow()
+
+    /** Mientras haya un suscriptor se mantienen registrados los callbacks del catálogo. */
+    val catalogSummary: StateFlow<CatalogSummary> = catalogRepository.catalog
+        .map { catalog ->
+            when (catalog) {
+                CatalogState.Loading -> CatalogSummary()
+                is CatalogState.Ready -> CatalogSummary(count = catalog.apps.size)
+                is CatalogState.Error -> CatalogSummary(error = true)
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CatalogSummary())
 
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -63,6 +83,11 @@ class MainViewModel @Inject constructor(
             val status = roleController.status()
             _state.update { it.copy(roleStatus = status) }
         }
+    }
+
+    /** Reconsulta el catálogo (al reanudar, para cubrir eventos perdidos). */
+    fun refreshCatalog() {
+        viewModelScope.launch { catalogRepository.refresh() }
     }
 
     /** Solo se invoca por una acción explícita del usuario; nunca de forma automática. */

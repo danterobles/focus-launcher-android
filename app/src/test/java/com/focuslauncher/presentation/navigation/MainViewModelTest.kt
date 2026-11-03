@@ -5,6 +5,12 @@ import app.cash.turbine.test
 import com.focuslauncher.TestDispatchers
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
+import com.focuslauncher.domain.model.AppId
+import com.focuslauncher.domain.model.CatalogState
+import com.focuslauncher.domain.model.LaunchResult
+import com.focuslauncher.domain.repository.AppCatalogRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -29,11 +35,17 @@ class MainViewModelTest {
         override fun createRequestIntent(): Intent? { requestIntentCalls++; return intent }
     }
 
+    private class FakeCatalog : AppCatalogRepository {
+        override val catalog: Flow<CatalogState> = flowOf(CatalogState.Ready(emptyList()))
+        override suspend fun refresh() = Unit
+        override suspend fun launch(id: AppId) = LaunchResult.Success
+    }
+
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
     private fun TestScope.viewModel(controller: FakeRoleController) =
-        MainViewModel(controller, TestDispatchers(dispatcher))
+        MainViewModel(controller, FakeCatalog(), TestDispatchers(dispatcher))
 
     @Test
     fun homeIntentReturnsToHomeFromAnyScreen() = runTest(dispatcher) {

@@ -42,11 +42,13 @@ Aceptación: instalar en API 31 y API 35+, elegir Focus como Home, pulsar Home r
 
 ### T03 — Adaptador Android de catálogo y lanzamiento
 
-- [ ] Obtener handle actual y serial válido; consultar LauncherApps solo para ese perfil.
-- [ ] Declarar `<queries>` MAIN/LAUNCHER e intersectar componentes reales mediante PackageManager según arquitectura.
-- [ ] Implementar AppId/AppPackageKey, deduplicación, etiquetas/orden e iconos con fallback y caché acotada.
-- [ ] Lanzar componente con LauncherApps; capturar app retirada, no disponible y fallo de permisos.
-- [ ] Registrar/cancelar callbacks y refrescar en reanudación, eventos de paquete y locale.
+- [x] Obtener handle actual y serial válido; consultar LauncherApps solo para ese perfil.
+- [x] Declarar `<queries>` MAIN/LAUNCHER e intersectar componentes reales mediante PackageManager según arquitectura.
+- [x] Implementar AppId/AppPackageKey, deduplicación, etiquetas/orden e iconos con fallback y caché acotada.
+- [x] Lanzar componente con LauncherApps; capturar app retirada, no disponible y fallo de permisos.
+- [x] Registrar/cancelar callbacks y refrescar en reanudación, eventos de paquete y locale.
+
+Estado: **validada en emulador API 34** (2026-11-03); perfiles reales, API 31/35 y OEM quedan para T10. Evidencia en `docs/validation/T03.md`.
 
 Dependencias: T01. Cubre RF-03, RF-04, RF-12, RF-13, RNF-03.
 

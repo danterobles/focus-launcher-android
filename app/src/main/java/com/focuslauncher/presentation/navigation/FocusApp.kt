@@ -21,6 +21,7 @@ import com.focuslauncher.core.home.HomeRoleStatus
 @Composable
 fun FocusApp(
     state: MainUiState,
+    catalogSummary: CatalogSummary?,
     onNavigate: (Screen) -> Unit,
     onBack: () -> Unit,
     onRequestHomeRole: () -> Unit,
@@ -33,7 +34,7 @@ fun FocusApp(
         ) {
             Text(stringResource(screenTitle(state.screen)), style = MaterialTheme.typography.headlineMedium)
             if (state.screen == Screen.Home) {
-                HomePlaceholder(state, onNavigate, onRequestHomeRole)
+                HomePlaceholder(state, catalogSummary, onNavigate, onRequestHomeRole)
             } else {
                 Button(onClick = onBack) { Text(stringResource(R.string.action_back_home)) }
             }
@@ -44,6 +45,7 @@ fun FocusApp(
 @Composable
 private fun HomePlaceholder(
     state: MainUiState,
+    catalogSummary: CatalogSummary?,
     onNavigate: (Screen) -> Unit,
     onRequestHomeRole: () -> Unit,
 ) {
@@ -58,6 +60,16 @@ private fun HomePlaceholder(
     )
     if (state.roleStatus != HomeRoleStatus.Held) {
         Button(onClick = onRequestHomeRole) { Text(stringResource(R.string.action_request_home)) }
+    }
+    // Solo en builds depurables; la lista sin filtrar nunca se muestra (RF-11).
+    catalogSummary?.let {
+        Text(
+            when {
+                it.error -> "Catálogo: error"
+                it.count == null -> "Catálogo: cargando"
+                else -> "Catálogo: ${it.count} entradas"
+            },
+        )
     }
     if (state.homeSettingsUnavailable) Text(stringResource(R.string.home_settings_unavailable))
     Button(onClick = { onNavigate(Screen.Drawer) }) { Text(stringResource(R.string.screen_drawer)) }
