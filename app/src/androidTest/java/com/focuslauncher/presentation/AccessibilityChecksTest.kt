@@ -58,6 +58,11 @@ class AccessibilityChecksTest(private val dark: Boolean, private val dynamic: Bo
 
     @get:Rule val rule = createComposeRule()
 
+    /** El motor ATF de Compose solo detecta infracciones en API 34+ (lo demuestra la prueba guardia): antes sería superar en vacío. */
+    @org.junit.Before fun requireEffectiveEngine() = org.junit.Assume.assumeTrue(
+        "ATF efectivo solo en API 34+", android.os.Build.VERSION.SDK_INT >= 34,
+    )
+
     private fun app(n: Int) = InstalledApp(AppId("p.$n", "p.$n.Main", UserSerial(0)), "App %02d".format(n), true)
     private fun pkg(n: String, title: String, labels: List<String> = listOf(title), hidden: Boolean = false, installed: Boolean = true) =
         ManageablePackage(AppPackageKey(n, UserSerial(0)), title, labels, hidden, installed)

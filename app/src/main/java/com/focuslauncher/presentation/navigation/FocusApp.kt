@@ -54,6 +54,7 @@ fun FocusApp(
     onDismissMessage: () -> Unit,
     onAcceptWelcome: (requestHome: Boolean) -> Unit,
     onOpenSystemSettings: (SystemSettingsTarget) -> Unit,
+    onHomeContentReady: () -> Unit = {},
 ) {
     BackHandler(enabled = state.screen != Screen.Home) { onBack() }
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -89,6 +90,7 @@ fun FocusApp(
                         onRequestHomeRole = onRequestHomeRole,
                         onNoticeShown = vm::onNoticeShown,
                         onRetry = vm::onRetry,
+                        onContentReady = onHomeContentReady,
                     )
                 }
                 Screen.Drawer -> {

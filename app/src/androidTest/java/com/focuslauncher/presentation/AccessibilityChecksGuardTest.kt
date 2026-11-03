@@ -20,6 +20,8 @@ class AccessibilityChecksGuardTest {
     @get:Rule val rule = createComposeRule()
 
     @Test fun aTinyUnlabelledClickableIsRejected() {
+        // Registra el límite real: en API < 34 el motor no detecta nada y las pruebas ATF se omiten.
+        org.junit.Assume.assumeTrue("ATF efectivo solo en API 34+", android.os.Build.VERSION.SDK_INT >= 34)
         rule.enableAccessibilityChecks()
         rule.setContent { Box(Modifier.size(20.dp).background(Color.LightGray).clickable(onClick = {})) }
         val failed = runCatching { rule.onRoot().tryPerformAccessibilityChecks() }.exceptionOrNull()

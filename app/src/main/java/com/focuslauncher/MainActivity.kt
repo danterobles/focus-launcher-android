@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
                         onDismissMessage = viewModel::dismissMessage,
                         onAcceptWelcome = viewModel::onAcceptWelcome,
                         onOpenSystemSettings = viewModel::onOpenSystemSettings,
+                        onHomeContentReady = ::reportHomeReady,
                     )
                 }
             }
@@ -112,6 +113,15 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         // Solo la categoría HOME tiene efecto; los extras del Intent se ignoran por completo.
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.onHomeIntent()
+    }
+
+    private var reportedFullyDrawn = false
+
+    /** Arranque frío medible sin registros propios: el sistema anota «Fully drawn» (RNF-04). */
+    private fun reportHomeReady() {
+        if (reportedFullyDrawn) return
+        reportedFullyDrawn = true
+        reportFullyDrawn()
     }
 
     private fun handleEvent(event: MainEvent) {

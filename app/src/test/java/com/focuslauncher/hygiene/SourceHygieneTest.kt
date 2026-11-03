@@ -41,7 +41,10 @@ class SourceHygieneTest {
     }
 
     @Test fun theManifestDeclaresOnlyTheActivityAndNoBackup() {
+        // Sin comentarios y sin las directivas tools:node="remove" (que ELIMINAN componentes de dependencias).
         val manifest = File("src/main/AndroidManifest.xml").readText()
+            .replace(Regex("<!--[\\s\\S]*?-->"), "")
+            .replace(Regex("<(receiver|service|provider)[^>]*tools:node=\"remove\"[^>]*/>"), "")
         assertEquals(0, Regex("<(service|receiver|provider)").findAll(manifest).count())
         assertEquals(1, Regex("<activity\\b").findAll(manifest).count())
         assertTrue(manifest.contains("android:allowBackup=\"false\""))

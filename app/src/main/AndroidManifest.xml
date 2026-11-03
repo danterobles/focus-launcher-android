@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
         Visibilidad de paquetes acotada a las consultas auxiliares del catálogo (MAIN/LAUNCHER).
@@ -25,6 +26,16 @@
             Única Activity. Filtros HOME/DEFAULT y LAUNCHER separados. Ningún extra de Intent
             se interpreta como orden administrativa y no hay deep links.
         -->
+        <!--
+            Aportado por una dependencia (androidx.profileinstaller): receiver EXPORTADO para herramientas de
+            perfilado por adb. Focus no lo necesita (no incluye baseline profile) y la regla es no exponer
+            receivers: se elimina del manifiesto combinado. Lo verifica la tarea verifyReleaseManifest.
+        -->
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            tools:ignore="MissingClass"
+            tools:node="remove" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

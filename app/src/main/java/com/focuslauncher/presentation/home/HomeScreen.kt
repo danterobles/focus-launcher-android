@@ -57,7 +57,12 @@ fun HomeScreen(
     onRetry: () -> Unit = {},
     message: UiMessage? = null,
     onMessageShown: () -> Unit = {},
+    onContentReady: () -> Unit = {},
 ) {
+    // Primer contenido útil (lista filtrada, vacío o bloqueo explícito): marca «completamente dibujada».
+    LaunchedEffect(state.content is AppsContent.Loading) {
+        if (state.content !is AppsContent.Loading) onContentReady()
+    }
     LaunchedEffect(state.notice) {
         if (state.notice != null) {
             kotlinx.coroutines.delay(4_000)

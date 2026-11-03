@@ -89,7 +89,14 @@ Estos comandos son previstos para después de T01; ejecutarlos desde la raíz de
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-El último requiere emulador/dispositivo de prueba conectado. Si el proyecto adopta tareas diferentes, documentar sus nombres reales en README y aquí. No instalar automáticamente el launcher en un teléfono personal ni borrar sus datos para obtener pruebas verdes.
+El último requiere emulador/dispositivo de prueba conectado. Además:
+
+```bash
+./gradlew :app:verifyReleaseManifest   # manifiesto combinado del release: permisos, exports, backups, queries (se ejecuta tras assembleRelease)
+# Rendimiento (RNF-04) sobre código no depurable (build "benchmark"), con el fixture de fixtures/many-launchers instalado:
+./gradlew :app:connectedBenchmarkAndroidTest -PperfBuild=true -Pandroid.testInstrumentationRunnerArguments.class=com.focuslauncher.perf.PerformanceBudgetTest
+```
+Las pruebas ATF solo son efectivas en API 34+ (se omiten antes): no cuentan como superadas en API 31. Si el proyecto adopta tareas diferentes, documentar sus nombres reales en README y aquí. No instalar automáticamente el launcher en un teléfono personal ni borrar sus datos para obtener pruebas verdes.
 
 Comprobación estática: manifiesto combinado, permisos, exported, backups, versiones fijas y ausencia de secretos. No basta buscar en el manifiesto fuente: una dependencia puede agregar permisos.
 

@@ -25,6 +25,9 @@ Verificado el 2026-11-03. Solo versiones estables (sin alpha/beta/RC ni rangos d
 - `compileSdk = 37`: exigido por las dependencias (Compose UI 1.12.1 y Core KTX 1.19.1 requieren API 37; AGP 9.5 soporta hasta API 37).
 - `targetSdk = 36`: se mantiene un nivel por debajo para no activar cambios de comportamiento de la API 37 sin validarlos. **Revisar en T10** contra la última versión estable disponible.
 
+## Equipos de prueba (T10)
+Ver el registro completo en `docs/validation/T10.md` §1 y en el README. Emulador: Android Emulator 37.1.11.0 sobre Apple M2 Max (32 GB, macOS 27.2). Imágenes: API 31 `google_apis` rev. 11, API 34 `google_apis_playstore`, API 35 `google_apis` rev. 9 (arm64-v8a).
+
 ## Entorno de desarrollo usado
 - macOS (Darwin 27.2.0), JDK Zulu 17.0.11, Android SDK en `~/Library/Android/sdk` (plataformas 31 a 37, build-tools hasta 36.0.0).
 - Emulador de prueba: AVD `Pixel_8_Pro_API_34` (Android 14).

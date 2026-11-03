@@ -137,11 +137,13 @@ Aceptación: todos los recorridos P0 operables con TalkBack y fuente 200 %; ning
 
 ### T10 — Validación integrada, plataforma y rendimiento
 
-- [ ] Ejecutar unitarias, instrumentadas, Compose y matriz manual de la sección 3.
-- [ ] Medir objetivos RNF-04 en build release con fixture/entorno descritos; registrar p95, muestra y equipo.
-- [ ] Validar modo avión, arranque frío, reinicio de teléfono después del primer desbloqueo y eventos de paquetes.
-- [ ] Revisar manifiesto combinado, backup/D2D, permisos y ausencia de consultas multiperfil.
-- [ ] Resolver fallos P0 y repetir solo las comprobaciones afectadas más el recorrido básico.
+- [x] Ejecutar unitarias, instrumentadas, Compose y matriz manual de la sección 3. *(API 31, 34 y 35 en emuladores; filas de última API estable y Samsung pendientes.)*
+- [x] Medir objetivos RNF-04 en build release con fixture/entorno descritos; registrar p95, muestra y equipo. *(En emulador Pixel 6/API 35; falta repetir en el dispositivo físico de referencia.)*
+- [x] Validar modo avión, arranque frío, reinicio de teléfono después del primer desbloqueo y eventos de paquetes.
+- [x] Revisar manifiesto combinado, backup/D2D, permisos y ausencia de consultas multiperfil. *(D2D no probado: falta segundo dispositivo.)*
+- [x] Resolver fallos P0 y repetir solo las comprobaciones afectadas más el recorrido básico.
+
+Estado: **parcialmente validada** (2026-11-03). Hecho en emuladores API 31/34/35: suites completas, modo avión, reinicio, perfiles de trabajo y Espacio privado, manifiesto combinado y RNF-04 (todos los objetivos cumplidos en el emulador de referencia). **Pendiente, requiere hardware o descargas no hechas:** dispositivo físico (rendimiento, TalkBack, Recientes), Samsung One UI, última API estable (imagen no instalada) y D2D. Evidencia en `docs/validation/T10.md`.
 
 Dependencias: T01–T09. Cubre todos los RF y RNF.
 

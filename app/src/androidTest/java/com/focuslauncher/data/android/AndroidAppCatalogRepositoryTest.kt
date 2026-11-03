@@ -40,8 +40,9 @@ class AndroidAppCatalogRepositoryTest {
         return FileInputStream(pfd.fileDescriptor).bufferedReader().use { it.readText() }
     }
 
+    /** `topResumedActivity` existe desde Android 13; en Android 12 la línea equivalente es `mResumedActivity`. */
     private fun topResumed(): String = shell("dumpsys activity activities").lineSequence()
-        .firstOrNull { "topResumedActivity" in it }.orEmpty()
+        .firstOrNull { "topResumedActivity" in it || "mResumedActivity" in it }.orEmpty()
 
     private suspend fun readyApps(): List<InstalledApp> = withTimeout(10_000) {
         (repository.catalog.first { it !is CatalogState.Loading } as CatalogState.Ready).apps
@@ -63,6 +64,16 @@ class AndroidAppCatalogRepositoryTest {
         val apps = readyApps()
         assertFalse(apps.any { it.id.activityName.endsWith("FixtureNoLauncherActivity") })
         assertFalse(apps.any { it.id.packageName == context.packageName })
+    }
+
+    /** RF-13: con perfiles de trabajo / Espacio privado presentes, el catálogo solo trae el perfil actual. */
+    @Test
+    fun everyEntryBelongsToTheCurrentUserOnly() = runBlocking {
+        val apps = readyApps()
+        val current = apps.map { it.id.userSerial }.toSet()
+        assertEquals("el catálogo mezcla perfiles: $current", 1, current.size)
+        val userManager = context.getSystemService(android.os.UserManager::class.java)
+        assertEquals(userManager.getSerialNumberForUser(android.os.Process.myUserHandle()), current.single().value)
     }
 
     @Test
@@ -87,14 +98,18 @@ class AndroidAppCatalogRepositoryTest {
 
     private fun launchAndAwait(app: InstalledApp) = runBlocking {
         assertEquals(LaunchResult.Success, repository.launch(app.id))
-        val expected = "${app.id.packageName}/${app.id.activityName}"
+        val expectedComponent = "${app.id.packageName}/${app.id.activityName}"
+        // Android 12/12L (API 31–32): «Atrás» en una actividad raíz ya NO la cierra y relanzar una entrada
+        // launcher de una app con tarea existente solo trae esa tarea al frente («its current task has been
+        // brought to the front»). Allí se exige que la app correcta quede al frente; desde API 33, el componente exacto.
+        val expected = if (android.os.Build.VERSION.SDK_INT >= 33) expectedComponent else "${app.id.packageName}/"
         val deadline = System.currentTimeMillis() + 10_000
         while (expected !in topResumed() && System.currentTimeMillis() < deadline) Thread.sleep(200)
         assertTrue("esperaba $expected como actividad superior; hay: ${topResumed()}", expected in topResumed())
         // Ambas actividades comparten tarea: se cierra la abierta para que la siguiente quede encima.
         shell("input keyevent KEYCODE_BACK")
         val closeBy = System.currentTimeMillis() + 5_000
-        while (expected in topResumed() && System.currentTimeMillis() < closeBy) Thread.sleep(200)
+        while (expectedComponent in topResumed() && System.currentTimeMillis() < closeBy) Thread.sleep(200)
     }
 
     @Test
