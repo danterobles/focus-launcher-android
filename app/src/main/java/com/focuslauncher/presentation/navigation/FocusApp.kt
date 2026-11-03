@@ -22,6 +22,7 @@ import com.focuslauncher.core.home.HomeRoleStatus
 fun FocusApp(
     state: MainUiState,
     catalogSummary: CatalogSummary?,
+    settingsStatus: String?,
     onNavigate: (Screen) -> Unit,
     onBack: () -> Unit,
     onRequestHomeRole: () -> Unit,
@@ -34,7 +35,7 @@ fun FocusApp(
         ) {
             Text(stringResource(screenTitle(state.screen)), style = MaterialTheme.typography.headlineMedium)
             if (state.screen == Screen.Home) {
-                HomePlaceholder(state, catalogSummary, onNavigate, onRequestHomeRole)
+                HomePlaceholder(state, catalogSummary, settingsStatus, onNavigate, onRequestHomeRole)
             } else {
                 Button(onClick = onBack) { Text(stringResource(R.string.action_back_home)) }
             }
@@ -46,6 +47,7 @@ fun FocusApp(
 private fun HomePlaceholder(
     state: MainUiState,
     catalogSummary: CatalogSummary?,
+    settingsStatus: String?,
     onNavigate: (Screen) -> Unit,
     onRequestHomeRole: () -> Unit,
 ) {
@@ -71,6 +73,7 @@ private fun HomePlaceholder(
             },
         )
     }
+    settingsStatus?.let { Text("Ajustes: $it") }
     if (state.homeSettingsUnavailable) Text(stringResource(R.string.home_settings_unavailable))
     Button(onClick = { onNavigate(Screen.Drawer) }) { Text(stringResource(R.string.screen_drawer)) }
     Button(onClick = { onNavigate(Screen.Settings) }) { Text(stringResource(R.string.screen_settings)) }

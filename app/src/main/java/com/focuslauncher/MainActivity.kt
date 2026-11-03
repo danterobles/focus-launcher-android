@@ -40,9 +40,11 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val summary by viewModel.catalogSummary.collectAsStateWithLifecycle()
+                val settingsStatus by viewModel.settingsStatus.collectAsStateWithLifecycle()
                 FocusApp(
                     state = state,
                     catalogSummary = if (isDebuggable) summary else null,
+                    settingsStatus = if (isDebuggable) settingsStatus else null,
                     onNavigate = viewModel::navigateTo,
                     onBack = viewModel::navigateBack,
                     onRequestHomeRole = viewModel::onRequestHomeRole,

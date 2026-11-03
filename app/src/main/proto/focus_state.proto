@@ -1,0 +1,38 @@
+syntax = "proto3";
+package focuslauncher.storage;
+option java_package = "com.focuslauncher.data.local.proto";
+option java_multiple_files = true;
+
+message PackageKeyProto {
+  string package_name = 1;
+  int64 user_serial = 2;
+}
+
+message PinVerifierProto {
+  string kdf = 1;            // "PBKDF2WithHmacSHA256"
+  uint32 iterations = 2;     // v1: 600000
+  bytes salt = 3;            // v1: 16 bytes
+  bytes verifier = 4;        // v1: 32 bytes
+}
+
+message PinConfigProto {
+  oneof mode {
+    bool disabled = 1;      // presencia + valor true; false es inválido
+    PinVerifierProto enabled = 2;
+  }
+}
+
+message AttemptStateProto {
+  uint32 reserved_in_window = 1; // 0..5
+  uint32 penalty_level = 2;      // 0..5, siguiente nivel si hubo espera
+  bool cooldown_active = 3;
+  uint64 cooldown_duration_ms = 4;
+}
+
+message FocusStateProto {
+  uint32 schema_version = 1;     // exactamente 1 para esta implementación
+  bool onboarding_accepted = 2;
+  repeated PackageKeyProto hidden_packages = 3;
+  PinConfigProto pin = 4;
+  AttemptStateProto attempts = 5;
+}

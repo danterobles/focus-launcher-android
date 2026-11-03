@@ -1,1 +1,2 @@
-# Reglas R8 específicas de Focus Launcher (se ampliarán en T04 si Protobuf lite las requiere).
+# Protobuf lite: los mensajes generados se acceden por reflexión sobre sus campos.
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }

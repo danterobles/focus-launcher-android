@@ -6,7 +6,9 @@ import com.focuslauncher.core.di.DispatcherProvider
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
 import com.focuslauncher.domain.model.CatalogState
+import com.focuslauncher.domain.model.SettingsReadState
 import com.focuslauncher.domain.repository.AppCatalogRepository
+import com.focuslauncher.domain.repository.FocusStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +50,7 @@ data class MainUiState(
 class MainViewModel @Inject constructor(
     private val roleController: HomeRoleController,
     private val catalogRepository: AppCatalogRepository,
+    private val stateRepository: FocusStateRepository,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
@@ -64,6 +67,19 @@ class MainViewModel @Inject constructor(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CatalogSummary())
+
+    /** Etiqueta no sensible del estado de ajustes (solo depuración); T05 consumirá la política real. */
+    val settingsStatus: StateFlow<String> = stateRepository.settings
+        .map { state ->
+            when (state) {
+                SettingsReadState.Loading -> "cargando"
+                is SettingsReadState.Ready ->
+                    "listo (reglas=${state.settings.visibility.hiddenPackages.size}, pin=${state.settings.pinEnabled}, aviso=${state.settings.onboardingAccepted})"
+                is SettingsReadState.ReadError -> "error de lectura: ${state.kind}"
+                is SettingsReadState.RecoveryRequired -> "recuperación requerida: ${state.reason}"
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "cargando")
 
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()

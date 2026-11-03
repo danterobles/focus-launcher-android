@@ -56,11 +56,13 @@ Aceptación: comparar con fixtures de una app con dos actividades, una sin activ
 
 ### T04 — Estado local tipado y cifrado
 
-- [ ] Implementar schema v1, mappers e invariantes de DATA.
-- [ ] Crear DataStore singleton en noBackupFilesDir con serializer AES-GCM y alias Keystore definidos.
-- [ ] Separar bootstrap nuevo de error/recuperación; modelar Loading/Ready/ReadError/RecoveryRequired.
-- [ ] Configurar exclusión de backup/transferencia y revisar manifiesto combinado.
-- [ ] Probar escritura transaccional y lectura tras recrear repositorio/proceso sin instancias simultáneas del mismo archivo.
+- [x] Implementar schema v1, mappers e invariantes de DATA.
+- [x] Crear DataStore singleton en noBackupFilesDir con serializer AES-GCM y alias Keystore definidos.
+- [x] Separar bootstrap nuevo de error/recuperación; modelar Loading/Ready/ReadError/RecoveryRequired.
+- [x] Configurar exclusión de backup/transferencia y revisar manifiesto combinado.
+- [x] Probar escritura transaccional y lectura tras recrear repositorio/proceso sin instancias simultáneas del mismo archivo.
+
+Estado: **validada en emulador API 34** (2026-11-03); D2D, API 31/35+ y OEM quedan para T10. Evidencia en `docs/validation/T04.md`.
 
 Dependencias: T01; integrar con T02/T03 al cerrar tarea. Cubre RF-11, RF-15, RF-16, RNF-03, RNF-05.
 
