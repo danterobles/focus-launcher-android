@@ -9,3 +9,6 @@ local.properties
 captures/
 .kotlin/
 graphify-out/
+
+# APK de prueba generado por scripts/build-test-apk.sh (nunca se versiona)
+dist/

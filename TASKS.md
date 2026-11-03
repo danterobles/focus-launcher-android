@@ -201,3 +201,35 @@ Para pruebas que alteran perfiles, apps, reloj o datos usar exclusivamente dispo
 Tras crear el proyecto, usar los comandos de [CLAUDE.md](CLAUDE.md). Unitarias verifican lógica con repositorios/relojes falsos; instrumentación valida Keystore/DataStore y UI. Las pruebas reales del rol y OEM requieren el sistema operativo, no una sustitución simulada.
 
 Guardar evidencia en `docs/validation/` del futuro repositorio: entorno, comando/recorrido, resultado y defecto relacionado. Las capturas deben usar apps y credenciales de prueba. Este documento es un plan; no constituye un informe de pruebas ejecutadas.
+
+## 6. Trazabilidad final y estado por requisito (T11)
+
+Estado a 2026-11-03. **Validado** = comprobado con evidencia real en emuladores API 31/34/35 (ver `docs/validation/`). **Parcial** = validado en emulador y con una parte que exige hardware o descargas no hechas. Ningún requisito está en fallo.
+
+| Requisito | Tareas | Estado | Evidencia |
+| --- | --- | --- | --- |
+| RF-01 aviso de alcance | T08 | Validado | `T08.md` |
+| RF-02 rol Home | T02, T08, T10 | Validado (API 31/34/35) | `T02.md`, `T08.md`, `T10.md` §4 |
+| RF-03 catálogo real | T03, T10 | Validado | `T03.md`, `T10.md` |
+| RF-04 abrir la entrada correcta | T03, T05 | Validado | `T03.md`, `T05.md` |
+| RF-05 ocultar por paquete (< 500 ms) | T05, T07, T10 | Validado (p95 29 ms en emulador) | `T05.md`, `T07.md`, `T10.md` §3 |
+| RF-06 búsqueda local | T05, T10 | Validado (p95 100 ms en emulador) | `T05.md`, `T10.md` §3 |
+| RF-07 configuración alcanzable y protegida | T05–T07 | Validado | `T06.md`, `T07.md` |
+| RF-08 PIN | T06 | Validado | `T06.md` |
+| RF-09 sesión de 2 min y revocaciones | T06, T07, T09, T10 | Validado | `T06.md`, `T09.md`, `T10.md` §4 |
+| RF-10 intentos y esperas | T06, T07, T10 | Validado (incl. reinicio y cierre durante la KDF) | `T06.md`, `T10.md` §4 |
+| RF-11 persistencia y sin apps sin filtrar | T04, T05, T10 | Validado (incl. reinicio del dispositivo) | `T04.md`, `T10.md` |
+| RF-12 eventos de paquetes y tombstones | T03, T07, T10 | Validado | `T03.md`, `T07.md`, `T10.md` §4 |
+| RF-13 solo el perfil actual | T03, T08, T10 | Validado (trabajo y Espacio privado en API 35, emulador) | `T10.md` §4 |
+| RF-14 PIN olvidado, ayuda y restablecer | T07, T08 | Validado | `T07.md`, `T08.md` |
+| RF-15 errores de almacenamiento | T04, T05–T08 | Validado | `T04.md`, `T08.md` |
+| RF-16 sin nube / sin `INTERNET` | T04, T10 | Validado la exclusión de copias y el manifiesto; **D2D sin probar** | `T04.md`, `T10.md` §4–§5 |
+| RNF-01 plataformas | T01, T10 | **Parcial**: API 31/34/35 en emulador; última API estable y Samsung pendientes | `T10.md` §1, §7 |
+| RNF-02 accesibilidad | T09 | **Parcial**: ATF (API 34+), semántica, 200 % y objetivos ≥ 48 dp; **TalkBack real pendiente** | `T09.md` |
+| RNF-03 hilos y privacidad | T01, T06, T09 | Validado (KDF fuera del hilo principal, sin logs ni estado guardable) | `T06.md`, `T09.md` |
+| RNF-04 rendimiento | T10 | **Parcial**: cumple en el emulador de referencia; el dispositivo físico está pendiente | `T10.md` §3 |
+| RNF-05 offline y manifiesto | T04, T10 | Validado (suite en modo avión; manifiesto combinado auditado) | `T10.md` §2, §5 |
+| RNF-06 pruebas | T01, T10, T11 | Validado: 183 unitarias; 166 instrumentadas ×3 dispositivos; ninguna plataforma se declara validada sin evidencia | `T10.md` §2 |
+
+### Pendientes (no son fallos; requieren hardware o descargas)
+1. Dispositivo físico de referencia (rendimiento, TalkBack real, miniatura de Recientes). 2. Samsung One UI. 3. Última versión estable de Android (API 36/36.1/37.0 sin imagen). 4. D2D con dos equipos. Detalle en `docs/RELEASE-NOTES.md` y `docs/validation/T10.md` §7.

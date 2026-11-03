@@ -97,3 +97,5 @@ Perfil soportado significa `Process.myUserHandle()`, no necesariamente el usuari
 MVP aceptado cuando todos los RF y RNF P0 están cubiertos por T01–T11, sin defectos que filtren apps ocultas, permitan mutaciones sin PIN o impidan volver a Home. La entrega será APK de prueba, código y evidencia de validación; la publicación en una tienda es una etapa posterior.
 
 Este paquete de documentos es la entrada para esa implementación. [ARCHITECTURE.md](ARCHITECTURE.md) define componentes, [DATA.md](DATA.md) contratos y persistencia, [TASKS.md](TASKS.md) ejecución y [CLAUDE.md](CLAUDE.md) reglas operativas.
+
+> **Estado de la entrega (2026-11-03):** versión 0.1.0, MVP candidato validado en emuladores API 31/34/35 sin fallos P0 abiertos. Los requisitos con validación pendiente de hardware (RNF-01, RNF-02, RNF-04 y la transferencia D2D de RF-16) y la trazabilidad completa están en [TASKS.md §6](TASKS.md) y en [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md).

@@ -245,3 +245,17 @@ Una corrupción, pérdida de clave o PIN olvidado no ofrece un botón sin autent
 - Errores: nunca emitir todas las apps por defecto ni deshabilitar PIN ante excepción. No registrar secretos ni restaurarlos desde backup.
 
 La implementación y evidencia se ordenan en [TASKS.md](TASKS.md); [CLAUDE.md](CLAUDE.md) prohíbe atajos que invaliden estos contratos.
+
+## 11. Notas de implementación (T11)
+
+Contratos finales tal como quedaron implementados. **No cambian los modelos, el esquema Protobuf v1, el sobre cifrado ni el algoritmo de intentos**; son adiciones de interfaz y aclaraciones.
+
+- **`AdminRepository`** añade `isAuthorized: StateFlow<Boolean>` (sesión vigente; nunca persistida) y `cooldownRemainingMs()`. `verifyPin` devuelve además `NotRequired` (no hay PIN) y `Unavailable` (la verificación terminó tras salir de la pantalla/bloquear el dispositivo: puede contabilizar el intento pero no emite sesión). `MutationResult` añade `Unavailable` y `AuthenticationRequired` como en §7.
+- **`OnboardingRepository.acceptOnboarding()`** (nuevo): marca `onboarding_accepted = true` por el mismo coordinador y `Mutex`. **No exige sesión** (no cambia reglas ni credenciales) y es idempotente; con el estado ilegible devuelve `RecoveryRequired`. Solo se confirma tras persistir.
+- **`FocusStateRepository`** añade `retry()` para los `ReadError` reintentables. Su proyección (`LauncherSettings`) nunca incluye el verificador ni los contadores.
+- **Restablecer** (`resetConfiguration`) escribe el estado inicial v1 con la clave actual, por lo que deja `onboarding_accepted = false` y la app vuelve a la Bienvenida.
+- **Espera tras reinicio:** si el archivo indica espera activa y el proceso no la ha visto, se reaplica su duración completa desde el reloj monotónico actual (también tras reiniciar el dispositivo). Verificado en API 31 y 35.
+- **Orden de duraciones** por nivel: `[30, 60, 120, 240, 480, 900]` s; el nivel se conserva al vencer la espera y se reinicia con un acierto.
+- **Fallos del almacén** (`StateFailure.Kind`): `Corrupt`, `FutureVersion`, `TooLarge`, `InvalidState`, `KeyLost`, `InterruptedInit` ⇒ `RecoveryRequired`; `KeyUnavailable`, `Io` ⇒ `ReadError` reintentable. Solo se transporta la clase del fallo, nunca datos.
+- **Borrar datos desde Android** elimina también la clave de Keystore (comprobado en API 31, 34 y 35), por lo que Focus arranca como instalación limpia y no queda atascado en `InterruptedInit`.
+- **Casos de prueba obligatorios (§10):** están cubiertos por pruebas unitarias e instrumentadas (Keystore real); ver `docs/validation/T04.md` y `T06.md`.

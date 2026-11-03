@@ -161,3 +161,18 @@ No instalar `ReplaceFileCorruptionHandler` que convierta un fallo en ajustes vac
 Pruebas unitarias: filtrado por paquete/serial, duplicados, búsqueda, carreras de lanzamiento, sesión, contador, cancelación y errores. Instrumentación: serializer cifrado con Keystore real, DataStore y reinicio del proceso. Compose: bienvenida, estados vacíos, ocultación, autenticación y navegación restaurada. Validación de sistema: rol Home real, Recientes, reinicio del teléfono y OEM.
 
 [TASKS.md](TASKS.md) contiene la secuencia y matriz obligatorias. No se considera probada la selección Home mediante un mock de RoleManager ni la seguridad del PIN con pruebas exclusivamente visuales.
+
+## 10. Notas de implementación (T11)
+
+Aclaraciones y adiciones surgidas al implementar. **Ningún contrato cambia de significado**; cada punto está validado en `docs/validation/`.
+
+- **Manifiesto final.** El esqueleto de §4 es orientativo. Además: `android:icon`/`roundIcon` (icono adaptable con capa monocroma), `dataExtractionRules` con 18 exclusiones, y `<receiver android:name="androidx.profileinstaller.ProfileInstallReceiver" tools:node="remove" />` porque esa dependencia aportaba un receiver **exportado**. La tarea `./gradlew :app:verifyReleaseManifest` audita el manifiesto **combinado** del release (permisos, exports, backups, `queries`) y se ejecuta tras `assembleRelease`.
+- **Destinos de navegación:** `Welcome`, `Home`, `Drawer`, `Help`, `Settings` y `Security` (los dos últimos administrativos). El estado vive solo en memoria; tras morir el proceso siempre se arranca en Inicio. Salir del área administrativa, recibir Home, `onStop` (salvo cambio de configuración) y `ACTION_SCREEN_OFF` revocan la sesión.
+- **Aviso de alcance (RF-01):** la Bienvenida reemplaza a Inicio/cajón/Configuración mientras la configuración sea legible y `onboarding_accepted` sea `false` (instalación nueva o tras restablecer); solo la Ayuda la precede. Mientras la configuración carga o falla no se inventa una Bienvenida.
+- **Tema del sistema:** `FocusTheme` (claro/oscuro del dispositivo y colores dinámicos; siempre disponibles con `minSdk 31`) y tema de ventana con variante `values-night`.
+- **Diseños con poco alto:** con alto disponible < 520 dp (horizontal, fuente grande, teclado) Inicio y cajón son una sola cuadrícula desplazable y Configuración una sola lista; con alto suficiente se conserva la barra fija de accesos.
+- **Búsqueda:** `SearchIndex` normaliza los nombres **una vez por lista** y cada pulsación solo normaliza la consulta (RNF-04).
+- **Arranque medible:** `reportFullyDrawn()` se llama cuando Inicio muestra su primer contenido útil (lista, vacío o bloqueo explícito).
+- **Compilaciones:** `debug`, `release` (R8) y `benchmark` (como release, no depurable, **sin R8** y firmada con la clave de depuración local; solo con `-PperfBuild=true`, para medir RNF-04 con pruebas instrumentadas). `scripts/build-test-apk.sh` genera el APK de prueba.
+- **Estado de la UI de administración:** `AdminGate` (`Loading`, `Blocked`, `NeedsPin`, `Open`) decide qué se compone; los ViewModels administrativos usan `replayExpiration = 0` para no conservar etiquetas ni estado de PIN sin observadores.
+- **Pruebas:** la accesibilidad automática (ATF) solo es efectiva en API 34+ (se omite antes); las pruebas instrumentadas usan un almacén aislado por prueba (alias y archivo únicos).
