@@ -9,10 +9,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FocusLauncher">
 
-        <!-- T01: solo entrada LAUNCHER. El filtro HOME/DEFAULT y singleTask llegan en T02. -->
+        <!--
+            Única Activity. Filtros HOME/DEFAULT y LAUNCHER separados. Ningún extra de Intent
+            se interpreta como orden administrativa y no hay deep links.
+        -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

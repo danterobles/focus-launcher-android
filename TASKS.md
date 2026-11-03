@@ -29,10 +29,12 @@ Aceptación: build debug y prueba unitaria de muestra se ejecutan desde checkout
 
 ### T02 — Entrada Home y ciclo de vida
 
-- [ ] Registrar Activity exportada con filtros HOME/DEFAULT y LAUNCHER separados; `singleTask` y manejo de `onNewIntent`.
-- [ ] Implementar HomeRoleController y solicitud oficial por acción explícita.
-- [ ] Manejar aceptación/cancelación, rol no disponible, pérdida del rol y reanudación.
-- [ ] Definir navegación Home/cajón/configuración/bienvenida, sin deep links de administración.
+- [x] Registrar Activity exportada con filtros HOME/DEFAULT y LAUNCHER separados; `singleTask` y manejo de `onNewIntent`.
+- [x] Implementar HomeRoleController y solicitud oficial por acción explícita.
+- [x] Manejar aceptación/cancelación, rol no disponible, pérdida del rol y reanudación.
+- [x] Definir navegación Home/cajón/configuración/bienvenida, sin deep links de administración.
+
+Estado: **implementada; validación parcial** (2026-11-03). Verificada en API 34; pendiente API 31 y 35+ (sin imágenes instaladas). Evidencia en `docs/validation/T02.md`.
 
 Dependencias: T01. Cubre RF-02, parte de RF-09 y RF-14.
 

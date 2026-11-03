@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Focus Launcher</string>
-    <string name="placeholder_title">Focus Launcher</string>
-    <string name="placeholder_status">Base del proyecto (T01)</string>
+
+    <string name="screen_welcome">Bienvenida</string>
+    <string name="screen_home">Inicio</string>
+    <string name="screen_drawer">Todas las aplicaciones</string>
+    <string name="screen_settings">Configuración de Focus</string>
+    <string name="screen_help">Ayuda</string>
+    <string name="action_back_home">Volver al inicio</string>
+
+    <string name="role_status_held">Focus es tu pantalla de inicio.</string>
+    <string name="role_status_not_held">Focus no es tu pantalla de inicio.</string>
+    <string name="role_status_unavailable">Este dispositivo no permite solicitar la pantalla de inicio desde Focus.</string>
+    <string name="action_request_home">Usar Focus como pantalla de inicio</string>
+    <string name="home_settings_unavailable">No se pudo abrir los ajustes de inicio del sistema. Cámbialo desde Ajustes de Android.</string>
 </resources>

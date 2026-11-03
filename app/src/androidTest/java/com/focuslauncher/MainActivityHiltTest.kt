@@ -8,7 +8,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-/** T01: Hilt crea la Activity y su ViewModel, y Compose renderiza el marcador. */
+/** Hilt crea la Activity y su ViewModel, y Compose renderiza la pantalla Inicio. */
 @HiltAndroidTest
 class MainActivityHiltTest {
     @get:Rule(order = 0)
@@ -21,7 +21,7 @@ class MainActivityHiltTest {
     fun setUp() = hiltRule.inject()
 
     @Test
-    fun activityStartsWithHiltViewModel() {
-        composeRule.onNodeWithText("Loading").assertExists()
+    fun activityStartsOnHomeScreen() {
+        composeRule.onNodeWithText("Inicio").assertExists()
     }
 }
