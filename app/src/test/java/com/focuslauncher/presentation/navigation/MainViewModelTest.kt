@@ -8,6 +8,7 @@ import com.focuslauncher.core.home.HomeRoleStatus
 import com.focuslauncher.domain.model.AppId
 import com.focuslauncher.domain.model.CatalogState
 import com.focuslauncher.domain.model.LaunchResult
+import com.focuslauncher.domain.repository.AdminRepository
 import com.focuslauncher.domain.repository.AppCatalogRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -41,11 +42,24 @@ class MainViewModelTest {
         override suspend fun launch(id: AppId) = LaunchResult.Success
     }
 
+    private class FakeAdmin : AdminRepository {
+        var locks = 0
+        override val isAuthorized = kotlinx.coroutines.flow.MutableStateFlow(false)
+        override fun lock() { locks++ }
+        override suspend fun verifyPin(pin: CharArray) = com.focuslauncher.domain.model.AuthenticationResult.NotRequired
+        override suspend fun cooldownRemainingMs() = 0L
+        override suspend fun setPackageHidden(key: com.focuslauncher.domain.model.AppPackageKey, hidden: Boolean) = com.focuslauncher.domain.model.MutationResult.Success
+        override suspend fun enablePin(pin: CharArray, confirmation: CharArray) = com.focuslauncher.domain.model.MutationResult.Success
+        override suspend fun changePin(pin: CharArray, confirmation: CharArray) = com.focuslauncher.domain.model.MutationResult.Success
+        override suspend fun disablePin() = com.focuslauncher.domain.model.MutationResult.Success
+        override suspend fun resetConfiguration() = com.focuslauncher.domain.model.MutationResult.Success
+    }
+
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
     private fun TestScope.viewModel(controller: FakeRoleController) =
-        MainViewModel(controller, FakeCatalog(), TestDispatchers(dispatcher))
+        MainViewModel(controller, FakeCatalog(), FakeAdmin(), TestDispatchers(dispatcher))
 
     @Test
     fun homeIntentReturnsToHomeFromAnyScreen() = runTest(dispatcher) {
@@ -122,5 +136,29 @@ class MainViewModelTest {
         controller.status = HomeRoleStatus.NotHeld
         vm.refreshRoleStatus(); dispatcher.scheduler.advanceUntilIdle()
         assertEquals(HomeRoleStatus.NotHeld, vm.state.value.roleStatus)
+    }
+
+    @Test
+    fun leavingAdministrativeAreaRevokesTheSession() = runTest(dispatcher) {
+        val admin = FakeAdmin()
+        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, TestDispatchers(dispatcher))
+        vm.navigateTo(Screen.Settings)
+        vm.navigateTo(Screen.Security) // dentro de administración: no revoca
+        assertEquals(0, admin.locks)
+        vm.navigateTo(Screen.Home)
+        assertEquals(1, admin.locks)
+    }
+
+    @Test
+    fun homeIntentAndStopRevokeAndLeaveNoAdministrativeScreen() = runTest(dispatcher) {
+        val admin = FakeAdmin()
+        val vm = MainViewModel(FakeRoleController(HomeRoleStatus.Held), FakeCatalog(), admin, TestDispatchers(dispatcher))
+        vm.navigateTo(Screen.Settings)
+        vm.onHomeIntent()
+        assertEquals(Screen.Home, vm.state.value.screen)
+        vm.navigateTo(Screen.Settings)
+        vm.onActivityStopped()
+        assertEquals(Screen.Home, vm.state.value.screen)
+        assertEquals(true, admin.locks >= 2)
     }
 }

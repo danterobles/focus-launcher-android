@@ -13,6 +13,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -41,7 +42,7 @@ class StateLocation(val file: File)
  * Único dueño del DataStore del estado. Una instancia por archivo. Las escrituras salen solo por
  * [update] (que valida invariantes); los ViewModels nunca reciben este tipo.
  */
-class FocusStateStore(
+open class FocusStateStore(
     private val location: StateLocation,
     private val cipher: StateCipher,
     private val scope: CoroutineScope,
@@ -130,7 +131,7 @@ class FocusStateStore(
      * Transformación atómica con `updateData`. Se valida el estado actual, el resultado y las reglas
      * de escritura antes de confirmar.
      */
-    suspend fun update(transform: (FocusStateProto) -> FocusStateProto): StateWriteResult = try {
+    open suspend fun update(transform: (FocusStateProto) -> FocusStateProto): StateWriteResult = try {
         val store = ensureDataStore()
         store.updateData { current ->
             StateValidator.validate(current)
@@ -151,6 +152,9 @@ class FocusStateStore(
             else -> StateWriteResult.StorageFailure
         }
     }
+
+    /** Lectura puntual validada (primer valor); para el coordinador de seguridad. */
+    open suspend fun readCurrent(): StateResult = observe().first()
 
     /** Libera el DataStore (pruebas y cierre ordenado): permite crear otra instancia sobre el mismo archivo. */
     suspend fun close() {

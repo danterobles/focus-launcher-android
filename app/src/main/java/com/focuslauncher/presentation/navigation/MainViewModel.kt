@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.focuslauncher.core.di.DispatcherProvider
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
+import com.focuslauncher.domain.repository.AdminRepository
 import com.focuslauncher.domain.repository.AppCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -41,6 +42,7 @@ data class MainUiState(
 class MainViewModel @Inject constructor(
     private val roleController: HomeRoleController,
     private val catalogRepository: AppCatalogRepository,
+    private val adminRepository: AdminRepository,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
@@ -50,14 +52,27 @@ class MainViewModel @Inject constructor(
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    fun navigateTo(screen: Screen) = _state.update { it.copy(screen = screen) }
-
-    fun navigateBack() = _state.update {
-        if (it.screen == Screen.Home) it else it.copy(screen = Screen.Home)
+    /** Salir del área administrativa revoca la sesión de inmediato. */
+    fun navigateTo(screen: Screen) {
+        if (_state.value.screen.administrative && !screen.administrative) adminRepository.lock()
+        _state.update { it.copy(screen = screen) }
     }
 
-    /** `onNewIntent` con categoría HOME: vuelve a Home. T06 revocará aquí la sesión administrativa. */
-    fun onHomeIntent() = navigateTo(Screen.Home)
+    fun navigateBack() {
+        if (_state.value.screen != Screen.Home) navigateTo(Screen.Home)
+    }
+
+    /** `onNewIntent` con categoría HOME: cierra administración, revoca la sesión y vuelve a Inicio. */
+    fun onHomeIntent() {
+        adminRepository.lock()
+        navigateTo(Screen.Home)
+    }
+
+    /** Segundo plano (no por cambio de configuración): revoca y no deja contenido administrativo. */
+    fun onActivityStopped() {
+        adminRepository.lock()
+        _state.update { if (it.screen.administrative) it.copy(screen = Screen.Home) else it }
+    }
 
     /** Vuelve a consultar el rol (al reanudar y al recibir el resultado de la solicitud). */
     fun refreshRoleStatus() {

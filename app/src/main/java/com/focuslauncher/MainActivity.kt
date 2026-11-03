@@ -3,6 +3,7 @@ package com.focuslauncher
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,8 +22,11 @@ import com.focuslauncher.core.ui.LocalAppIconLoader
 import com.focuslauncher.presentation.navigation.FocusApp
 import com.focuslauncher.presentation.navigation.MainEvent
 import com.focuslauncher.presentation.navigation.MainViewModel
+import com.focuslauncher.presentation.navigation.Screen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -59,7 +63,35 @@ class MainActivity : ComponentActivity() {
                 viewModel.events.collect(::handleEvent)
             }
         }
+        // FLAG_SECURE en pantallas administrativas (capturas y miniatura de Recientes).
+        lifecycleScope.launch {
+            viewModel.state.map { it.screen }.distinctUntilChanged().collect { applySecureFlag(it) }
+        }
         // Un Home recibido al crear la Activity ya arranca en la pantalla principal.
+    }
+
+    /**
+     * Se activa al entrar en una pantalla administrativa y solo se retira cuando el contenido ya fue
+     * reemplazado Y la Activity vuelve a estar visible: así la miniatura de Recientes, que se toma al
+     * pasar a segundo plano, nunca incluye contenido sensible.
+     */
+    private fun applySecureFlag(
+        screen: Screen,
+        // En API 29+ el estado STARTED se notifica DESPUÉS de onStart(): por eso onStart pasa `true`.
+        visible: Boolean = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED),
+    ) {
+        if (screen.administrative) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        else if (visible) window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        applySecureFlag(viewModel.state.value.screen, visible = true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) viewModel.onActivityStopped()
     }
 
     override fun onResume() {

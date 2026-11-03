@@ -83,11 +83,13 @@ Aceptación: fixtures con paquete de dos actividades y nombres con acentos; ocul
 
 ### T06 — PIN, limitación de intentos y sesión administrativa
 
-- [ ] Implementar KDF, comparación, creación, cambio y desactivación según DATA, sin guardar PIN original.
-- [ ] Implementar reserva de intentos previa a KDF, espera progresiva y recuperación tras proceso nuevo.
-- [ ] Centralizar mutaciones administrativas y verificación bajo coordinador/Mutex con sesión opaca.
-- [ ] Caducar sesión en 120 s, salida, Home, segundo plano, pantalla apagada/bloqueada y muerte del proceso.
-- [ ] Evitar restauración de secreto/autorización; proteger PIN y administración frente a capturas/Recientes.
+- [x] Implementar KDF, comparación, creación, cambio y desactivación según DATA, sin guardar PIN original.
+- [x] Implementar reserva de intentos previa a KDF, espera progresiva y recuperación tras proceso nuevo.
+- [x] Centralizar mutaciones administrativas y verificación bajo coordinador/Mutex con sesión opaca.
+- [x] Caducar sesión en 120 s, salida, Home, segundo plano, pantalla apagada/bloqueada y muerte del proceso.
+- [x] Evitar restauración de secreto/autorización; proteger PIN y administración frente a capturas/Recientes.
+
+Estado: **validada en emulador API 34** (2026-11-03); coste de la KDF a medir en el equipo de referencia y Recientes/OEM en T09/T10. Evidencia en `docs/validation/T06.md`.
 
 Dependencias: T04, T02. Cubre RF-07, RF-08, RF-09, RF-10, RF-11, RF-15, RNF-03.
 
