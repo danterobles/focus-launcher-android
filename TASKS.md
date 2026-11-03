@@ -16,10 +16,12 @@ Dependencias: T01 habilita T02, T03 y T04; T05 necesita esas tres. T06 necesita 
 
 ### T01 — Base del proyecto y registro de decisiones
 
-- [ ] Crear `:app`, package `com.focuslauncher`, Kotlin, Compose/Material 3, Hilt, Coroutines, Lifecycle, DataStore tipado y Protobuf.
-- [ ] Fijar `minSdk = 31` y versiones estables compatibles de SDK/JDK/AGP/Gradle/Kotlin/Compose/Hilt; guardar catálogo de versiones y wrapper.
-- [ ] Añadir estructura de capas, dispatchers y reloj inyectables; configurar pruebas unitarias y Compose/instrumentación.
-- [ ] Copiar estos cinco documentos a raíz del repositorio; agregar instrucciones de build y registro de versiones/equipos al README.
+- [x] Crear `:app`, package `com.focuslauncher`, Kotlin, Compose/Material 3, Hilt, Coroutines, Lifecycle, DataStore tipado y Protobuf.
+- [x] Fijar `minSdk = 31` y versiones estables compatibles de SDK/JDK/AGP/Gradle/Kotlin/Compose/Hilt; guardar catálogo de versiones y wrapper.
+- [x] Añadir estructura de capas, dispatchers y reloj inyectables; configurar pruebas unitarias y Compose/instrumentación.
+- [x] Copiar estos cinco documentos a raíz del repositorio; agregar instrucciones de build y registro de versiones/equipos al README.
+
+Estado: **validada** (2026-11-03), evidencia en `docs/validation/T01.md`.
 
 Dependencias: ninguna. Cubre RNF-01, RNF-03, RNF-06.
 
