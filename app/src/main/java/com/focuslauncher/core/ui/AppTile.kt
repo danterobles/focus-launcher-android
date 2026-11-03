@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,8 @@ fun AppTile(app: InstalledApp, onClick: () -> Unit, modifier: Modifier = Modifie
         else Spacer(Modifier.size(ICON_SIZE))
         Text(
             text = app.label,
-            style = MaterialTheme.typography.labelMedium,
+            // Con fuente grande las palabras largas se separan con guion en lugar de partirse a ciegas.
+            style = MaterialTheme.typography.labelMedium.copy(hyphens = Hyphens.Auto),
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,

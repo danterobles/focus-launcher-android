@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.FocusLauncher" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Tema de ventana (antes de que Compose dibuje): sigue el modo claro/oscuro del sistema. -->
+    <style name="Theme.FocusLauncher" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
 </resources>

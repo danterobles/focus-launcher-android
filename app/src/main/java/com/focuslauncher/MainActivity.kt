@@ -11,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
@@ -19,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.focuslauncher.core.ui.AppIconLoader
+import com.focuslauncher.core.ui.FocusTheme
 import com.focuslauncher.core.ui.LocalAppIconLoader
 import com.focuslauncher.presentation.navigation.FocusApp
 import com.focuslauncher.presentation.navigation.MainEvent
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            FocusTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val needsWelcome by viewModel.needsWelcome.collectAsStateWithLifecycle()
                 CompositionLocalProvider(LocalAppIconLoader provides iconLoader) {

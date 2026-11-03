@@ -25,6 +25,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.focuslauncher.R
 import com.focuslauncher.presentation.admin.AdminBlockedScreen
+import com.focuslauncher.presentation.common.LoadingIndicator
 import com.focuslauncher.presentation.admin.AdminGate
 import com.focuslauncher.presentation.admin.AdminGateViewModel
 import com.focuslauncher.presentation.admin.PinGateScreen
@@ -128,7 +129,7 @@ private fun AdminArea(
     val gateVm: AdminGateViewModel = hiltViewModel()
     val gate by gateVm.gate.collectAsStateWithLifecycle()
     when (val g = gate) {
-        AdminGate.Loading -> Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        AdminGate.Loading -> LoadingIndicator(Modifier.fillMaxSize().padding(24.dp))
         is AdminGate.Blocked -> AdminBlockedScreen(g, onRetry = gateVm::retry, onOpenHelp = { onNavigate(Screen.Help) }, onBack = onBack)
         is AdminGate.NeedsPin -> PinGateScreen(g, onSubmit = gateVm::submit, onBack = { onNavigate(Screen.Home) }, onShown = gateVm::onGateShown)
         AdminGate.Open -> if (screen == Screen.Settings) {

@@ -124,10 +124,12 @@ Aceptación: PIN olvidado/clave perdida tiene instrucciones utilizables para cam
 
 ### T09 — Accesibilidad y privacidad de presentación
 
-- [ ] Probar TalkBack, foco, etiquetas/estados y objetivos táctiles.
-- [ ] Corregir fuente 200 %, teclado, insets, orientación y navegación gestual/3 botones.
-- [ ] Revisar Home, administración y miniaturas de Recientes; no exponer nombres ocultos tras bloquear sesión.
-- [ ] Revisar logs y estado guardado para excluir PIN, verificadores y catálogos administrativos.
+- [~] Probar TalkBack, foco, etiquetas/estados y objetivos táctiles. *(ATF y semántica verificados; falta TalkBack real en dispositivo.)*
+- [x] Corregir fuente 200 %, teclado, insets, orientación y navegación gestual/3 botones.
+- [~] Revisar Home, administración y miniaturas de Recientes; no exponer nombres ocultos tras bloquear sesión. *(Captura bloqueada y FLAG_SECURE verificados; la miniatura no se pudo ver en el emulador.)*
+- [x] Revisar logs y estado guardado para excluir PIN, verificadores y catálogos administrativos.
+
+Estado: **parcialmente validada** (2026-11-03). Hecho y probado en emulador API 34: ATF en 72 combinaciones pantalla×tema, semántica de lector de pantalla, alto reducido/fuente 200 %/orientación, tema del sistema, logs y estado guardado. **Pendiente en dispositivo real: sesión con TalkBack y miniatura de Recientes.** Evidencia en `docs/validation/T09.md`.
 
 Dependencias: T05, T06, T07, T08. Cubre RF-06, RF-09, RNF-02, RNF-03.
 

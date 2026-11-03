@@ -2,6 +2,8 @@ package com.focuslauncher.presentation.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -24,17 +25,22 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.focuslauncher.R
 import com.focuslauncher.domain.model.AppPackageKey
 import com.focuslauncher.domain.model.BlockedReason
 import com.focuslauncher.domain.model.ManageablePackage
+import com.focuslauncher.presentation.common.LoadingIndicator
 
 /**
  * Editor de visibilidad. Cada cambio se guarda al instante; el interruptor refleja el valor
  * CONFIRMADO, nunca uno optimista, y se muestra el estado de guardado.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
@@ -44,30 +50,43 @@ fun SettingsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.screen_settings), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 16.dp))
-        SaveIndicatorText(state.indicator)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = onOpenSecurity, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.screen_security)) }
-            TextButton(onClick = onOpenHelp, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.screen_help)) }
-            TextButton(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.action_back_home)) }
+    // Una sola lista desplazable: título, indicador y accesos van dentro, de modo que con poco alto
+    // (horizontal, fuente grande) nada se comprime ni queda recortado.
+    LazyColumn(
+        modifier.fillMaxSize().padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            Text(
+                stringResource(R.string.screen_settings),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(top = 16.dp).semantics { heading() },
+            )
+        }
+        item { SaveIndicatorText(state.indicator) }
+        item {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onOpenSecurity, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.screen_security)) }
+                TextButton(onClick = onOpenHelp, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.screen_help)) }
+                TextButton(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.action_back_home)) }
+            }
         }
         when (val content = state.content) {
-            EditorContent.Loading -> CircularProgressIndicator()
-            EditorContent.Locked -> Text(stringResource(R.string.settings_locked))
-            is EditorContent.Blocked -> Text(
-                stringResource(
-                    if (content.reason is BlockedReason.RecoveryRequired) R.string.state_recovery_body else R.string.state_read_error_body,
-                ),
-            )
+            EditorContent.Loading -> item { LoadingIndicator(Modifier.fillMaxWidth().padding(24.dp)) }
+            EditorContent.Locked -> item { Text(stringResource(R.string.settings_locked)) }
+            is EditorContent.Blocked -> item {
+                Text(
+                    stringResource(
+                        if (content.reason is BlockedReason.RecoveryRequired) R.string.state_recovery_body else R.string.state_read_error_body,
+                    ),
+                )
+            }
             is EditorContent.Ready -> {
-                Text(stringResource(R.string.settings_scope_note), style = MaterialTheme.typography.bodySmall)
-                if (content.catalogError != null) Text(stringResource(R.string.state_catalog_error_body), color = MaterialTheme.colorScheme.error)
-                if (content.packages.isEmpty() && content.catalogError == null) Text(stringResource(R.string.settings_no_apps))
-                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    items(content.packages, key = { "${it.key.userSerial.value}/${it.key.packageName}" }) { pkg ->
-                        PackageRow(pkg, saving = pkg.key in content.saving, failed = content.failed[pkg.key], onSetVisible)
-                    }
+                item { Text(stringResource(R.string.settings_scope_note), style = MaterialTheme.typography.bodySmall) }
+                if (content.catalogError != null) item { Text(stringResource(R.string.state_catalog_error_body), color = MaterialTheme.colorScheme.error) }
+                if (content.packages.isEmpty() && content.catalogError == null) item { Text(stringResource(R.string.settings_no_apps)) }
+                items(content.packages, key = { "${it.key.userSerial.value}/${it.key.packageName}" }) { pkg ->
+                    PackageRow(pkg, saving = pkg.key in content.saving, failed = content.failed[pkg.key], onSetVisible)
                 }
             }
         }
@@ -104,7 +123,13 @@ private fun PackageRow(
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            if (saving) CircularProgressIndicator(Modifier.padding(end = 8.dp)) else Text(stateText, style = MaterialTheme.typography.labelMedium)
+            if (saving) {
+                val savingDescription = stringResource(R.string.save_saving)
+                androidx.compose.material3.CircularProgressIndicator(Modifier.padding(end = 8.dp).semantics { contentDescription = savingDescription })
+            } else {
+                // Solo visual: el estado ya se anuncia con stateDescription; así no se lee dos veces.
+                Text(stateText, style = MaterialTheme.typography.labelMedium, modifier = Modifier.clearAndSetSemantics { })
+            }
             Switch(checked = visible, onCheckedChange = null, enabled = !saving)
         }
         if (failed != null) Text(stringResource(failed.messageRes()), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

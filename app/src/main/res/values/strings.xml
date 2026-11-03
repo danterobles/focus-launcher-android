@@ -137,4 +137,5 @@
     <string name="help_recovery_corrupt">El archivo de configuración está dañado o fue modificado.</string>
     <string name="help_recovery_future">La configuración es de una versión más nueva de Focus.</string>
     <string name="help_recovery_interrupted">La primera configuración se interrumpió y quedó a medias.</string>
+    <string name="loading_description">Cargando</string>
 </resources>

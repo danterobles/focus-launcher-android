@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.focuslauncher.R
 import com.focuslauncher.core.security.PinPolicy
 import com.focuslauncher.core.ui.PinField
+import com.focuslauncher.presentation.common.LoadingIndicator
 
 private enum class Confirm { DisablePin, Reset }
 
@@ -53,12 +55,12 @@ fun SecurityScreen(
     val mismatch = confirmation.isNotEmpty() && pin != confirmation
 
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.screen_security), style = MaterialTheme.typography.headlineMedium)
-        if (state.pinEnabled == null) { LinearProgressIndicator(Modifier.fillMaxWidth()); return@Column }
+        Text(stringResource(R.string.screen_security), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+        if (state.pinEnabled == null) { LoadingIndicator(Modifier.fillMaxWidth()); return@Column }
 
         Text(stringResource(if (enabled) R.string.security_pin_on else R.string.security_pin_off))
         Text(stringResource(R.string.security_pin_note), style = MaterialTheme.typography.bodySmall)
-        Text(stringResource(if (enabled) R.string.security_change_title else R.string.security_create_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(if (enabled) R.string.security_change_title else R.string.security_create_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
         PinField(pin, { pin = it; onDismissError() }, stringResource(R.string.pin_new_label), Modifier.fillMaxWidth(), enabled = !state.busy, imeAction = ImeAction.Next)
         PinField(confirmation, { confirmation = it; onDismissError() }, stringResource(R.string.pin_confirm_label), Modifier.fillMaxWidth(), enabled = !state.busy)
         Text(stringResource(R.string.pin_requirements), style = MaterialTheme.typography.bodySmall)
@@ -83,7 +85,7 @@ fun SecurityScreen(
         if (enabled) OutlinedButton(onClick = { pending = Confirm.DisablePin }, enabled = !state.busy, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(stringResource(R.string.security_disable_action))
         }
-        Text(stringResource(R.string.security_reset_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.security_reset_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
         OutlinedButton(onClick = { pending = Confirm.Reset }, enabled = !state.busy, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(stringResource(R.string.security_reset_action))
         }

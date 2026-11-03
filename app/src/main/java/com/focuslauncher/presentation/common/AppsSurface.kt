@@ -3,10 +3,10 @@ package com.focuslauncher.presentation.common
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.focuslauncher.R
@@ -32,27 +35,47 @@ fun AppsSurface(
     onAppClick: (AppId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (content) {
-        AppsContent.Loading -> Box(modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        is AppsContent.Apps -> LazyVerticalGrid(
+    if (content is AppsContent.Apps) {
+        LazyVerticalGrid(
             columns = GridCells.Fixed(GRID_COLUMNS),
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(content.apps, key = { "${it.id.userSerial.value}/${it.id.packageName}/${it.id.activityName}" }) { app ->
-                AppTile(app, onClick = { onAppClick(app.id) })
-            }
-        }
+        ) { appItems(content, onAppClick) }
+    } else {
+        AppsStateBlock(content, modifier)
+    }
+}
+
+/** Entradas de apps para una cuadrícula (reutilizable cuando la pantalla entera se desplaza). */
+fun LazyGridScope.appItems(content: AppsContent.Apps, onAppClick: (AppId) -> Unit) {
+    items(content.apps, key = { "${it.id.userSerial.value}/${it.id.packageName}/${it.id.activityName}" }) { app ->
+        AppTile(app, onClick = { onAppClick(app.id) })
+    }
+}
+
+/** Carga, vacío, sin resultados, error o recuperación: cualquier contenido que no sean apps. */
+@Composable
+fun AppsStateBlock(content: AppsContent, modifier: Modifier = Modifier) {
+    when (content) {
+        AppsContent.Loading -> LoadingIndicator(modifier.fillMaxWidth().padding(24.dp))
+        is AppsContent.Apps -> Unit
         AppsContent.Empty -> StateMessage(R.string.state_empty_title, R.string.state_empty_body, modifier)
         AppsContent.NoResults -> StateMessage(R.string.state_no_results_title, R.string.state_no_results_body, modifier)
-        is AppsContent.Blocked -> when (val reason = content.reason) {
+        is AppsContent.Blocked -> when (content.reason) {
             is BlockedReason.SettingsReadError -> StateMessage(R.string.state_read_error_title, R.string.state_read_error_body, modifier)
             is BlockedReason.RecoveryRequired -> StateMessage(R.string.state_recovery_title, R.string.state_recovery_body, modifier)
             is BlockedReason.CatalogFailure -> StateMessage(R.string.state_catalog_error_title, R.string.state_catalog_error_body, modifier)
         }
+    }
+}
+
+/** Indicador de carga con descripción para lectores de pantalla (un indicador mudo no dice nada). */
+@Composable
+fun LoadingIndicator(modifier: Modifier = Modifier) {
+    val description = stringResource(R.string.loading_description)
+    Box(modifier, contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(Modifier.semantics { contentDescription = description })
     }
 }
 
@@ -63,7 +86,7 @@ fun StateMessage(title: Int, body: Int, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(stringResource(title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(stringResource(title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
         Text(stringResource(body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
     }
 }
@@ -84,3 +107,6 @@ fun NoticeText(notice: Notice?, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.bodyMedium,
     )
 }
+
+/** Con poco alto (horizontal, fuente grande) la pantalla entera se desplaza en lugar de comprimir la lista. */
+val CONSTRAINED_HEIGHT = 520.dp

@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -50,7 +51,7 @@ fun PinGateScreen(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.pin_gate_title), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.pin_gate_title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
         Text(stringResource(R.string.pin_gate_body))
         PinField(
             value = pin,
@@ -103,7 +104,7 @@ fun AdminBlockedScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.screen_settings), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.screen_settings), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
         val recovery = blocked.recovery != null
         Text(stringResource(if (recovery) R.string.state_recovery_title else R.string.state_read_error_title), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(if (recovery) R.string.state_recovery_body else R.string.state_read_error_body))
