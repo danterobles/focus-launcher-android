@@ -5,17 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.focuslauncher.core.di.DispatcherProvider
 import com.focuslauncher.core.home.HomeRoleController
 import com.focuslauncher.core.home.HomeRoleStatus
-import com.focuslauncher.domain.model.CatalogState
-import com.focuslauncher.domain.model.SettingsReadState
 import com.focuslauncher.domain.repository.AppCatalogRepository
-import com.focuslauncher.domain.repository.FocusStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -32,9 +26,6 @@ sealed interface MainEvent {
     data object OpenHomeSettings : MainEvent
 }
 
-/** Resumen no sensible del catálogo (solo cuenta; nunca la lista sin filtrar). T05 lo sustituye. */
-data class CatalogSummary(val count: Int? = null, val error: Boolean = false)
-
 data class MainUiState(
     val screen: Screen = Screen.Home,
     val roleStatus: HomeRoleStatus = HomeRoleStatus.Unavailable,
@@ -50,36 +41,11 @@ data class MainUiState(
 class MainViewModel @Inject constructor(
     private val roleController: HomeRoleController,
     private val catalogRepository: AppCatalogRepository,
-    private val stateRepository: FocusStateRepository,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainUiState())
     val state: StateFlow<MainUiState> = _state.asStateFlow()
-
-    /** Mientras haya un suscriptor se mantienen registrados los callbacks del catálogo. */
-    val catalogSummary: StateFlow<CatalogSummary> = catalogRepository.catalog
-        .map { catalog ->
-            when (catalog) {
-                CatalogState.Loading -> CatalogSummary()
-                is CatalogState.Ready -> CatalogSummary(count = catalog.apps.size)
-                is CatalogState.Error -> CatalogSummary(error = true)
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CatalogSummary())
-
-    /** Etiqueta no sensible del estado de ajustes (solo depuración); T05 consumirá la política real. */
-    val settingsStatus: StateFlow<String> = stateRepository.settings
-        .map { state ->
-            when (state) {
-                SettingsReadState.Loading -> "cargando"
-                is SettingsReadState.Ready ->
-                    "listo (reglas=${state.settings.visibility.hiddenPackages.size}, pin=${state.settings.pinEnabled}, aviso=${state.settings.onboardingAccepted})"
-                is SettingsReadState.ReadError -> "error de lectura: ${state.kind}"
-                is SettingsReadState.RecoveryRequired -> "recuperación requerida: ${state.reason}"
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "cargando")
 
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()

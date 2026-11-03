@@ -2,7 +2,6 @@ package com.focuslauncher
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -11,21 +10,27 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.focuslauncher.core.ui.AppIconLoader
+import com.focuslauncher.core.ui.LocalAppIconLoader
 import com.focuslauncher.presentation.navigation.FocusApp
 import com.focuslauncher.presentation.navigation.MainEvent
 import com.focuslauncher.presentation.navigation.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject lateinit var iconLoader: AppIconLoader
 
     // El resultado aislado no prueba nada: se vuelve a consultar el rol, sea cual sea el resultado.
     private val roleRequest =
@@ -39,16 +44,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
-                val summary by viewModel.catalogSummary.collectAsStateWithLifecycle()
-                val settingsStatus by viewModel.settingsStatus.collectAsStateWithLifecycle()
-                FocusApp(
-                    state = state,
-                    catalogSummary = if (isDebuggable) summary else null,
-                    settingsStatus = if (isDebuggable) settingsStatus else null,
-                    onNavigate = viewModel::navigateTo,
-                    onBack = viewModel::navigateBack,
-                    onRequestHomeRole = viewModel::onRequestHomeRole,
-                )
+                CompositionLocalProvider(LocalAppIconLoader provides iconLoader) {
+                    FocusApp(
+                        state = state,
+                        onNavigate = viewModel::navigateTo,
+                        onBack = viewModel::navigateBack,
+                        onRequestHomeRole = viewModel::onRequestHomeRole,
+                    )
+                }
             }
         }
         lifecycleScope.launch {
@@ -58,9 +61,6 @@ class MainActivity : ComponentActivity() {
         }
         // Un Home recibido al crear la Activity ya arranca en la pantalla principal.
     }
-
-    private val isDebuggable: Boolean
-        get() = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     override fun onResume() {
         super.onResume()

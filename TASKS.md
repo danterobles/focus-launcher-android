@@ -70,10 +70,12 @@ Aceptación: round-trip instrumentado con Keystore real; cada escritura cambia I
 
 ### T05 — Política visual y recorrido Home/cajón/búsqueda
 
-- [ ] Implementar ObserveVisibleApps y LaunchApp con revalidación antes de abrir.
-- [ ] Home: primeras 8 entradas visibles; cajón: todas; cuatro columnas y tema del sistema.
-- [ ] Búsqueda en lista filtrada con comparación sin mayúsculas/acentos, sin historial persistente.
-- [ ] Diseñar estados vacío, carga y fallo; acceso permanente a configuración/ayuda.
+- [x] Implementar ObserveVisibleApps y LaunchApp con revalidación antes de abrir.
+- [x] Home: primeras 8 entradas visibles; cajón: todas; cuatro columnas y tema del sistema.
+- [x] Búsqueda en lista filtrada con comparación sin mayúsculas/acentos, sin historial persistente.
+- [x] Diseñar estados vacío, carga y fallo; acceso permanente a configuración/ayuda.
+
+Estado: **validada en emulador API 34** (2026-11-03); RNF-04 se mide en T10. Evidencia en `docs/validation/T05.md`.
 
 Dependencias: T02, T03, T04. Cubre RF-04, RF-05, RF-06, RF-07, RF-11, RF-15.
 

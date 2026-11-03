@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
@@ -11,80 +12,77 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.focuslauncher.R
-import com.focuslauncher.core.home.HomeRoleStatus
+import com.focuslauncher.presentation.drawer.DrawerScreen
+import com.focuslauncher.presentation.drawer.DrawerViewModel
+import com.focuslauncher.presentation.home.HomeScreen
+import com.focuslauncher.presentation.home.HomeViewModel
 
-/** Contenedor de navegación. Las pantallas reales llegan en T05–T08; aquí solo hay marcadores. */
+/** Contenedor de navegación. Settings/Security/Welcome/Help son marcadores hasta T07–T08. */
 @Composable
 fun FocusApp(
     state: MainUiState,
-    catalogSummary: CatalogSummary?,
-    settingsStatus: String?,
     onNavigate: (Screen) -> Unit,
     onBack: () -> Unit,
     onRequestHomeRole: () -> Unit,
 ) {
     BackHandler(enabled = state.screen != Screen.Home) { onBack() }
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp, androidx.compose.ui.Alignment.CenterVertically),
-        ) {
-            Text(stringResource(screenTitle(state.screen)), style = MaterialTheme.typography.headlineMedium)
-            if (state.screen == Screen.Home) {
-                HomePlaceholder(state, catalogSummary, settingsStatus, onNavigate, onRequestHomeRole)
-            } else {
-                Button(onClick = onBack) { Text(stringResource(R.string.action_back_home)) }
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            when (state.screen) {
+                Screen.Home -> {
+                    val vm: HomeViewModel = hiltViewModel()
+                    val home by vm.state.collectAsStateWithLifecycle()
+                    HomeScreen(
+                        state = home,
+                        roleStatus = state.roleStatus,
+                        homeSettingsUnavailable = state.homeSettingsUnavailable,
+                        onAppClick = vm::onAppClick,
+                        onOpenDrawer = { onNavigate(Screen.Drawer) },
+                        onOpenSettings = { onNavigate(Screen.Settings) },
+                        onOpenHelp = { onNavigate(Screen.Help) },
+                        onRequestHomeRole = onRequestHomeRole,
+                        onNoticeShown = vm::onNoticeShown,
+                    )
+                }
+                Screen.Drawer -> {
+                    val vm: DrawerViewModel = hiltViewModel()
+                    val drawer by vm.state.collectAsStateWithLifecycle()
+                    DrawerScreen(
+                        state = drawer,
+                        onQueryChange = vm::onQueryChange,
+                        onAppClick = vm::onAppClick,
+                        onBack = onBack,
+                        onNoticeShown = vm::onNoticeShown,
+                        onLeave = vm::clearQuery,
+                    )
+                }
+                else -> Placeholder(state.screen, onBack)
             }
         }
     }
 }
 
 @Composable
-private fun HomePlaceholder(
-    state: MainUiState,
-    catalogSummary: CatalogSummary?,
-    settingsStatus: String?,
-    onNavigate: (Screen) -> Unit,
-    onRequestHomeRole: () -> Unit,
-) {
-    Text(
-        stringResource(
-            when (state.roleStatus) {
-                HomeRoleStatus.Held -> R.string.role_status_held
-                HomeRoleStatus.NotHeld -> R.string.role_status_not_held
-                HomeRoleStatus.Unavailable -> R.string.role_status_unavailable
-            },
-        ),
-    )
-    if (state.roleStatus != HomeRoleStatus.Held) {
-        Button(onClick = onRequestHomeRole) { Text(stringResource(R.string.action_request_home)) }
-    }
-    // Solo en builds depurables; la lista sin filtrar nunca se muestra (RF-11).
-    catalogSummary?.let {
+private fun Placeholder(screen: Screen, onBack: () -> Unit) {
+    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            when {
-                it.error -> "Catálogo: error"
-                it.count == null -> "Catálogo: cargando"
-                else -> "Catálogo: ${it.count} entradas"
-            },
+            stringResource(
+                when (screen) {
+                    Screen.Welcome -> R.string.screen_welcome
+                    Screen.Settings -> R.string.screen_settings
+                    Screen.Security -> R.string.screen_security
+                    else -> R.string.screen_help
+                },
+            ),
+            style = MaterialTheme.typography.headlineMedium,
         )
+        Button(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.action_back_home)) }
     }
-    settingsStatus?.let { Text("Ajustes: $it") }
-    if (state.homeSettingsUnavailable) Text(stringResource(R.string.home_settings_unavailable))
-    Button(onClick = { onNavigate(Screen.Drawer) }) { Text(stringResource(R.string.screen_drawer)) }
-    Button(onClick = { onNavigate(Screen.Settings) }) { Text(stringResource(R.string.screen_settings)) }
-    Button(onClick = { onNavigate(Screen.Help) }) { Text(stringResource(R.string.screen_help)) }
-    Button(onClick = { onNavigate(Screen.Welcome) }) { Text(stringResource(R.string.screen_welcome)) }
-}
-
-private fun screenTitle(screen: Screen): Int = when (screen) {
-    Screen.Welcome -> R.string.screen_welcome
-    Screen.Home -> R.string.screen_home
-    Screen.Drawer -> R.string.screen_drawer
-    Screen.Settings -> R.string.screen_settings
-    Screen.Help -> R.string.screen_help
 }

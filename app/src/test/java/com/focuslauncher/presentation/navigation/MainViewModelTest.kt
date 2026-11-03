@@ -8,9 +8,7 @@ import com.focuslauncher.core.home.HomeRoleStatus
 import com.focuslauncher.domain.model.AppId
 import com.focuslauncher.domain.model.CatalogState
 import com.focuslauncher.domain.model.LaunchResult
-import com.focuslauncher.domain.model.SettingsReadState
 import com.focuslauncher.domain.repository.AppCatalogRepository
-import com.focuslauncher.domain.repository.FocusStateRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
@@ -43,16 +41,11 @@ class MainViewModelTest {
         override suspend fun launch(id: AppId) = LaunchResult.Success
     }
 
-    private class FakeState : FocusStateRepository {
-        override val settings: Flow<SettingsReadState> = flowOf(SettingsReadState.Loading)
-        override fun retry() = Unit
-    }
-
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
     private fun TestScope.viewModel(controller: FakeRoleController) =
-        MainViewModel(controller, FakeCatalog(), FakeState(), TestDispatchers(dispatcher))
+        MainViewModel(controller, FakeCatalog(), TestDispatchers(dispatcher))
 
     @Test
     fun homeIntentReturnsToHomeFromAnyScreen() = runTest(dispatcher) {

@@ -9,9 +9,27 @@
     <string name="screen_help">Ayuda</string>
     <string name="action_back_home">Volver al inicio</string>
 
-    <string name="role_status_held">Focus es tu pantalla de inicio.</string>
     <string name="role_status_not_held">Focus no es tu pantalla de inicio.</string>
     <string name="role_status_unavailable">Este dispositivo no permite solicitar la pantalla de inicio desde Focus.</string>
     <string name="action_request_home">Usar Focus como pantalla de inicio</string>
     <string name="home_settings_unavailable">No se pudo abrir los ajustes de inicio del sistema. Cámbialo desde Ajustes de Android.</string>
+
+    <string name="screen_security">Seguridad</string>
+    <string name="action_search">Buscar</string>
+    <string name="search_label">Buscar aplicación</string>
+    <string name="action_open_app">Abrir %1$s</string>
+
+    <string name="state_empty_title">No hay aplicaciones visibles</string>
+    <string name="state_empty_body">Puedes mostrar aplicaciones desde «Configuración de Focus».</string>
+    <string name="state_no_results_title">Sin resultados</string>
+    <string name="state_no_results_body">Ninguna aplicación visible coincide con la búsqueda.</string>
+    <string name="state_read_error_title">No se pudo leer la configuración</string>
+    <string name="state_read_error_body">Por seguridad no se muestran aplicaciones hasta poder leerla. Vuelve a intentarlo o abre la ayuda.</string>
+    <string name="state_recovery_title">La configuración necesita recuperación</string>
+    <string name="state_recovery_body">No se muestran aplicaciones. Consulta la ayuda para volver a usar otro launcher o borrar los datos de Focus desde Ajustes de Android.</string>
+    <string name="state_catalog_error_title">No se pudo leer la lista de aplicaciones</string>
+    <string name="state_catalog_error_body">Inténtalo de nuevo más tarde.</string>
+    <string name="notice_app_unavailable">Esa aplicación ya no está disponible.</string>
+    <string name="notice_launch_failed">No se pudo abrir la aplicación.</string>
+    <string name="notice_settings_unavailable">No se pudo comprobar la configuración; no se abrió nada.</string>
 </resources>
