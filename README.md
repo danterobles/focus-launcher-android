@@ -6,6 +6,8 @@ Launcher Android **local y offline** para organización personal o familiar: dec
 
 **Estado: MVP candidato (versión 0.1.0), validado en emuladores (API 31, 34 y 35).** No se ha validado en dispositivos físicos, Samsung One UI ni en la última versión de Android; ver las [notas de la versión](docs/RELEASE-NOTES.md#limitaciones-y-pendientes-de-validación).
 
+Teléfonos físicos (Honor, Redmi…): [guía de instalación y desinstalación](docs/INSTALL-PHYSICAL-DEVICES.md).
+
 Documentos: [PRD](PRD.md) · [ARCHITECTURE](ARCHITECTURE.md) · [DATA](DATA.md) · [TASKS](TASKS.md) (incluye la trazabilidad final) · [CLAUDE](CLAUDE.md) · [notas de la versión](docs/RELEASE-NOTES.md) · [evidencia de validación](docs/validation/).
 
 ---
@@ -32,6 +34,8 @@ En un **emulador o teléfono de pruebas** (no en un teléfono personal para prue
 adb install -r dist/focus-launcher-0.1.0-test.apk
 adb shell am start -n com.focuslauncher/.MainActivity     # o ábrelo desde el cajón del teléfono («Focus Launcher»)
 ```
+Para teléfonos físicos de gama media (Honor/MagicOS, Redmi/MIUI-HyperOS) con ajustes de fabricante, desinstalación completa y registro de pruebas, sigue [docs/INSTALL-PHYSICAL-DEVICES.md](docs/INSTALL-PHYSICAL-DEVICES.md).
+
 Sin `adb`: copia el APK al teléfono, ábrelo desde el administrador de archivos y permite la instalación desde esa fuente cuando Android lo pida.
 
 ## 4. Elegir Focus como pantalla de inicio
