@@ -11,6 +11,8 @@ Fecha: 2026-11-03 · Estado: **MVP candidato, validado en emuladores.** No es un
 | Evidencia de validación real | `docs/validation/T01.md` … `T10.md` |
 | Instalación, uso, recuperación | `README.md` |
 
+**Artefacto verificado:** `focus-launcher-0.1.0-test.apk`, 3 132 211 bytes, SHA-256 `efb6cfd6d0e0a8ecfac2d2b3da1cedd46906e2a840c7d9f705d43854def8d544` (firmado con la clave de depuración de la máquina de pruebas, certificado SHA-256 `809f545d…d4c14`). Generado desde un checkout limpio y desde el repositorio de trabajo con el mismo resultado byte a byte. En otra máquina el hash será distinto porque la clave de depuración es distinta.
+
 La publicación en una tienda **no** forma parte de esta entrega.
 
 ## Qué hace

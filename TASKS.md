@@ -151,10 +151,12 @@ Aceptación: matriz con resultado y evidencia por entorno; cero fallos de filtra
 
 ### T11 — Entrega del MVP
 
-- [ ] Preparar APK de prueba y notas con limitaciones, versiones y dispositivos probados.
-- [ ] README reproducible: build, instalación, selección Home, uso, PIN olvidado y vuelta al launcher anterior.
-- [ ] Sincronizar documentos si hubo cambios aprobados de contrato; completar trazabilidad y pendientes.
-- [ ] Revisar que no se adjunten claves de firma, PIN de prueba persistido, datos personales ni logs sensibles.
+- [x] Preparar APK de prueba y notas con limitaciones, versiones y dispositivos probados.
+- [x] README reproducible: build, instalación, selección Home, uso, PIN olvidado y vuelta al launcher anterior.
+- [x] Sincronizar documentos si hubo cambios aprobados de contrato; completar trazabilidad y pendientes.
+- [x] Revisar que no se adjunten claves de firma, PIN de prueba persistido, datos personales ni logs sensibles.
+
+Estado: **entregada como MVP candidato** (2026-11-03): APK de prueba reproducible, README verificado de principio a fin sobre un checkout limpio y trazabilidad completa; **no** se declara validada en hardware real (pendientes en `docs/RELEASE-NOTES.md`). Evidencia en `docs/validation/T11.md`.
 
 Dependencias: T10 aprobado. Cubre RNF-01, RNF-06 y puerta de salida de PRD.
 
