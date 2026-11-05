@@ -6,7 +6,7 @@ Launcher Android **local y offline** para organización personal o familiar: dec
 
 **Estado: MVP candidato (versión 0.1.0), validado en emuladores (API 31, 34 y 35).** No se ha validado en dispositivos físicos, Samsung One UI ni en la última versión de Android; ver las [notas de la versión](docs/RELEASE-NOTES.md#limitaciones-y-pendientes-de-validación).
 
-Teléfonos físicos (Honor, Redmi…): [guía de instalación y desinstalación](docs/INSTALL-PHYSICAL-DEVICES.md).
+Teléfonos físicos (Honor, Redmi…): [guía de instalación y desinstalación](docs/INSTALL-PHYSICAL-DEVICES.md). Una vez instalado: **[OPERACION.md](OPERACION.md)** — ocultar apps, dejar solo algunas y configurar el PIN, con capturas.
 
 Documentos: [PRD](PRD.md) · [ARCHITECTURE](ARCHITECTURE.md) · [DATA](DATA.md) · [TASKS](TASKS.md) (incluye la trazabilidad final) · [CLAUDE](CLAUDE.md) · [notas de la versión](docs/RELEASE-NOTES.md) · [evidencia de validación](docs/validation/).
 
